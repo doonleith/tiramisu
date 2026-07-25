@@ -3,6 +3,12 @@
 #user { display: flex; align-items: center; gap: 28px; }
 header > p { position: relative; top: 4px; }
 #app-view { padding-top: 30px; }
+.tabs-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+.tabs { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 2px; }
+.tab { flex: 0 0 auto; background: #fff; color: var(--muted); }
+.tab[aria-selected="true"] { background: var(--blue); border-color: var(--blue); color: var(--ink); }
+.new-tab { flex: 0 0 auto; color: var(--blue-deep); background: var(--paper); }
+.new-tab:hover { background: var(--blue); border-color: var(--blue); }
 .google-sign-in { display: block; width: 180px; height: 40px; padding: 0; border: 0; border-radius: 20px; background: transparent; line-height: 0; }
 .google-sign-in img { display: block; width: 180px; height: 40px; }
 .google-sign-in:focus-visible { outline: 3px solid var(--blue-deep); outline-offset: 3px; }
@@ -18,4 +24,5 @@ header > p { position: relative; top: 4px; }
 .tile-add:hover { background: var(--blue); border-color: var(--blue); }
 @media (max-width: 760px) {
   .landing { padding-top: 54px; }
+  .tabs-bar { align-items: flex-start; }
 }
