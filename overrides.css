@@ -29,7 +29,12 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .savings { background: #9bd7ba38; }
 .repeat-field { display: flex !important; align-items: center; gap: 9px; cursor: pointer; }
 .repeat-field input { display: inline !important; width: 17px !important; margin: 0 !important; accent-color: var(--blue-deep); }
+.category-select { display: flex; align-items: center; gap: 10px; margin-top: 7px; }
+.category-select select { flex: 1; width: auto !important; margin-top: 0 !important; }
+.category-select #category { width: auto !important; }
 #category, #monthly-day { width: 100% !important; height: 43px; }
+.category-tile { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px; border-radius: 11px; }
+.category-tile svg { width: 24px; height: 24px; }
 .form-actions { display: flex; gap: 8px; }
 #save-another { background: #fff; color: var(--ink); }
 #save-another:hover { background: var(--blue); border-color: var(--blue); }
@@ -39,9 +44,9 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .tile-add { align-self: flex-start; margin-top: 16px; padding: 7px 10px; color: var(--blue-deep); background: var(--paper); transition: background .18s ease, border-color .18s ease, transform .18s ease; }
 .tile-add:hover { background: var(--blue); border-color: var(--blue); transform: translateY(-1px); }
 .breakdown-label { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.breakdown-label i { display: grid; place-items: center; width: 24px; height: 24px; flex: 0 0 auto; border-radius: 7px; font-style: normal; }
 .bar { background: #e5e2dc; }
-.transaction { grid-template-columns: 34px 1fr auto auto; }
+.transaction { grid-template-columns: 40px 1fr auto auto; }
+.transaction .icon { width: 40px; height: 40px; border-radius: 11px; }
 .transaction-main { min-width: 0; padding: 0; border: 0; border-radius: 5px; background: transparent; text-align: left; font: inherit; }
 .transaction-main b { display: block; }
 .edit-button { padding: 7px 8px; color: var(--blue-deep); background: transparent; }
@@ -55,5 +60,5 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
   .google-sign-in { width: 198px; height: 44px; }
   .google-sign-in img { width: 198px; height: 44px; }
   .preview-top small { max-width: 130px; }
-  .transaction { grid-template-columns: 34px 1fr auto auto; }
+  .transaction { grid-template-columns: 40px 1fr auto auto; }
 }
