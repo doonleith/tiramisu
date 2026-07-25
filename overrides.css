@@ -24,6 +24,8 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .setup-note { color: #5d5b64 !important; font-size: 13px !important; margin: 12px 0 0 !important; }
 .privacy-note { color: #56545d !important; margin-top: 8px !important; }
 .preview-top small { max-width: 180px; text-align: right; line-height: 1.35; }
+.preview-item { grid-template-columns: 40px 1fr auto; }
+.preview-icon { width: 40px; height: 40px; }
 .housing { background: #b9a4f838; }
 .energy { background: #f1c76138; }
 .savings { background: #9bd7ba38; }
