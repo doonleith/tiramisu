@@ -57,5 +57,11 @@
     <symbol id="other" viewBox="0 0 24 24" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="5" cy="12" r="1.25" fill="#20212A" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="#20212A" stroke="none"/><circle cx="19" cy="12" r="1.25" fill="#20212A" stroke="none"/>
     </symbol>
+    <symbol id="disposable-income" viewBox="0 0 24 24" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="12" cy="6.25" rx="6.75" ry="2.75" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5.25 6.25v5.75c0 1.5 3.02 2.75 6.75 2.75s6.75-1.25 6.75-2.75V6.25" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M5.25 12v5.75c0 1.5 3.02 2.75 6.75 2.75s6.75-1.25 6.75-2.75V12" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M12 4.9v2.7M10.75 5.55c.22-.48.7-.8 1.45-.8.9 0 1.45.4 1.45 1.03 0 .72-.7.92-1.45 1.08-.75.17-1.45.36-1.45 1.08 0 .63.55 1.03 1.45 1.03.75 0 1.23-.32 1.45-.8" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
   </defs>
 </svg>
