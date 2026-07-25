@@ -1,7 +1,7 @@
 #user { gap: 20px; }
 .cards { grid-template-columns: repeat(3, 1fr); }
-.summary-action { grid-column: 1 / -1; min-height: 92px; border: 0; background: var(--ink); color: #fff; font-size: 17px; letter-spacing: -.02em; }
-.summary-action:hover { background: #373840; }
+.summary-action { grid-column: 1 / -1; min-height: 92px; border: 0; background: var(--blue); color: var(--ink); font-size: 17px; letter-spacing: -.02em; }
+.summary-action:hover { background: #a7d8f7; }
 @media (max-width: 760px) {
   .summary-action { min-height: 130px; }
 }
