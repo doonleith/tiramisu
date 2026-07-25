@@ -72,7 +72,7 @@ The partial unique index on `(recurring_transaction_id, transaction_date)` preve
 3. The app saves a `recurring_transactions` rule and its first `transactions` occurrence.
 4. Whenever the user opens a month, the app checks active rules for the selected space.
 5. Missing occurrences for that month are inserted once, protected by the unique index.
-6. Deleting a recurring occurrence stops the underlying rule and deletes that occurrence.
+6. Deleting a recurring occurrence stops the underlying rule and removes that month’s occurrence plus any future occurrences, while retaining past history.
 
 This is an on-demand materialisation approach. It avoids background jobs while ensuring a monthly occurrence is available when its period is viewed.
 
