@@ -58,9 +58,9 @@
       <circle cx="5" cy="12" r="1.25" fill="#20212A" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="#20212A" stroke="none"/><circle cx="19" cy="12" r="1.25" fill="#20212A" stroke="none"/>
     </symbol>
     <symbol id="disposable-income" viewBox="0 0 24 24" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="7" y="8.1" width="10" height="7.8" rx="1.25" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="12" cy="12" r="1.5" fill="none" stroke="#20212A" stroke-width="1.8"/>
-      <path d="m7 10.4-3.3-2.15M7 12l-4-.55M7 13.6l-3.3 2.15M17 10.4l3.3-2.15M17 12l4-.55M17 13.6l3.3 2.15" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="3.5" y="8" width="13.25" height="8.5" rx="1.5" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="10.125" cy="12.25" r="1.6" fill="none" stroke="#20212A" stroke-width="1.8"/>
+      <path d="M19.5 3.25 20.35 5.65 22.75 6.5l-2.4.85-.85 2.4-.85-2.4-2.4-.85 2.4-.85ZM19.25 13.75l.5 1.45 1.45.5-1.45.5-.5 1.45-.5-1.45-1.45-.5 1.45-.5Z" fill="none" stroke="#20212A" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"/>
     </symbol>
     <symbol id="salary" viewBox="0 0 24 24" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <rect x="3.5" y="8" width="13.5" height="9" rx="1.5" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
