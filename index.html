@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/icon-192.svg">
   <title>Tiramisu — Personal finance</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="overrides.css?v=4">
+  <link rel="stylesheet" href="overrides.css?v=5">
 </head>
 <body>
   <main>
@@ -41,10 +41,9 @@
 
     <section id="app-view" hidden>
       <section class="cards">
-        <article><p>Income</p><strong id="income">£0.00</strong><small>Money in this month</small></article>
-        <article><p>Spent</p><strong id="spent">£0.00</strong><small>Money out this month</small></article>
+        <article><p>Income</p><strong id="income">£0.00</strong><small>Money in this month</small><button class="tile-add add" data-type="income" type="button">+ Add</button></article>
+        <article><p>Spent</p><strong id="spent">£0.00</strong><small>Money out this month</small><button class="tile-add add" data-type="expense" type="button">+ Add</button></article>
         <article class="left"><p>Left to spend</p><strong id="balance">£0.00</strong><small id="detail">Add income and expenses to get started.</small></article>
-        <button class="summary-action add" type="button">+ Add a transaction</button>
       </section>
       <section class="panels">
         <article><div class="heading"><div><small>Where it went</small><h2>Spending breakdown</h2></div><span id="total" hidden></span></div><div id="breakdown"></div></article>
@@ -52,6 +51,6 @@
       </section>
     </section>
   </main>
-  <dialog id="dialog"><form id="form"><div class="heading"><div><small id="form-note">New entry</small><h2 id="form-title">Add a transaction</h2></div><button type="button" id="close">×</button></div><input id="id" type="hidden"><fieldset><label><input type="radio" name="type" value="expense" checked>Expense</label><label><input type="radio" name="type" value="income">Income</label></fieldset><label>Amount<input id="amount" inputmode="decimal" placeholder="£ 0.00" required></label><label>Category<select id="category"></select></label><label>Date<input id="date" type="date" required></label><label>Note <em>optional</em><input id="note" maxlength="60" placeholder="What was this for?"></label><label class="repeat-field"><input id="repeat-monthly" type="checkbox">Repeat monthly</label><footer><button id="delete" type="button">Delete</button><button>Save transaction</button></footer></form></dialog>
-  <script src="supabase/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=17"></script>
+  <dialog id="dialog"><form id="form"><div class="heading"><div><small id="form-note">New entry</small><h2 id="form-title">Add a transaction</h2></div><button type="button" id="close">×</button></div><input id="id" type="hidden"><input id="type" type="hidden"><label>Amount<input id="amount" inputmode="decimal" placeholder="£ 0.00" required></label><label>Category<select id="category"></select></label><label>Date<input id="date" type="date" required></label><label>Note <em>optional</em><input id="note" maxlength="60" placeholder="What was this for?"></label><label class="repeat-field"><input id="repeat-monthly" type="checkbox">Repeat monthly</label><footer><button id="delete" type="button">Delete</button><button>Save transaction</button></footer></form></dialog>
+  <script src="supabase/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=18"></script>
 </body></html>
