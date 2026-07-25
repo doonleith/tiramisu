@@ -60,7 +60,12 @@
     <symbol id="disposable-income" viewBox="0 0 24 24" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <rect x="7" y="8.1" width="10" height="7.8" rx="1.25" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       <circle cx="12" cy="12" r="1.5" fill="none" stroke="#20212A" stroke-width="1.8"/>
-      <path d="M7 10.35c-1.5-1.65-3.25-2.05-4.8-1.1M7 12c-1.75-.55-3.35-.1-4.7 1.1M7 13.65c-1.4.8-2.85.95-4.1.35M17 10.35c1.5-1.65 3.25-2.05 4.8-1.1M17 12c1.75-.55 3.35-.1 4.7 1.1M17 13.65c1.4.8 2.85.95 4.1.35" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="m7 10.4-3.3-2.15M7 12l-4-.55M7 13.6l-3.3 2.15M17 10.4l3.3-2.15M17 12l4-.55M17 13.6l3.3 2.15" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="salary" viewBox="0 0 24 24" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3.5" y="8" width="13.5" height="9" rx="1.5" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="10.25" cy="12.5" r="1.55" fill="none" stroke="#20212A" stroke-width="1.8"/>
+      <path d="m13.25 7.25 5-5m0 0v3.5m0-3.5h-3.5" fill="none" stroke="#20212A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
     </symbol>
   </defs>
 </svg>
