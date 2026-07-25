@@ -50,7 +50,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .bar { background: #e5e2dc; }
 .panels { align-items: start; }
 .panels article:first-child { min-height: auto; }
-#transactions.is-scrollable { max-height: 650px; overflow: auto; padding-right: 6px; }
+#breakdown.is-scrollable, #transactions.is-scrollable { max-height: 650px; overflow-y: auto; overflow-x: hidden; padding-right: 6px; }
 .transaction { grid-template-columns: 40px 1fr auto auto; }
 .transaction .icon { width: 40px; height: 40px; border-radius: 11px; }
 .transaction-main { min-width: 0; padding: 0; border: 0; border-radius: 5px; background: transparent; text-align: left; font: inherit; }
