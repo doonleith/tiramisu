@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/icon-192.svg">
   <title>Tiramisu — Personal finance</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="overrides.css?v=13">
+  <link rel="stylesheet" href="overrides.css?v=14">
 </head>
 <body>
   <main>
@@ -23,12 +23,13 @@
     <section id="landing" class="landing">
       <div class="landing-copy">
         <h1>Every pound,<br><i>in its place.</i></h1>
-        <p>Track what comes in, what goes out, and what is left, all in one calm, private space.</p>
+        <p>See what comes in, what goes out, and what’s left — in one private, calm space.</p>
         <button class="google-sign-in" id="landing-sign-in" type="button" aria-label="Sign in with Google"><img src="assets/google-sign-in.svg" alt=""></button>
+        <p class="setup-note">Start with just one entry.</p>
         <p class="privacy-note">Private by default. Your data is only yours.</p>
       </div>
       <div class="landing-preview" aria-hidden="true">
-        <div class="preview-top"><span>July</span><b>£1,284.50</b><small>left to spend</small></div>
+        <div class="preview-top"><span>This month</span><b>£1,284.50</b><small>after bills and savings</small></div>
         <div class="preview-bar"><span></span></div>
         <div class="preview-item"><i class="housing">⌂</i><span>Rent / mortgage</span><b>£850.00</b></div>
         <div class="preview-item"><i class="energy">⚡</i><span>Gas &amp; electric</span><b>£94.00</b></div>
@@ -39,19 +40,23 @@
     </section>
 
     <section id="app-view" hidden>
-      <div class="tabs-bar"><div id="tabs" class="tabs" role="tablist" aria-label="Money tabs"></div><button id="new-tab" class="new-tab" type="button">+ New tab</button></div>
+      <div class="dashboard-toolbar">
+        <div id="tabs" class="tabs" role="tablist" aria-label="Money spaces"></div>
+        <div class="period-selector" aria-label="Selected period"><button id="previous-period" type="button" aria-label="Previous month">←</button><span id="period-label" aria-live="polite"></span><button id="next-period" type="button" aria-label="Next month">→</button></div>
+        <button id="new-tab" class="new-tab" type="button">+ Add space</button>
+      </div>
       <section class="cards">
-        <article><p>Income</p><strong id="income">£0.00</strong><small>Money in this month</small><button class="tile-add add" data-type="income" type="button">+ Add</button></article>
-        <article><p>Spent</p><strong id="spent">£0.00</strong><small>Money out this month</small><button class="tile-add add" data-type="expense" type="button">+ Add</button></article>
-        <article class="left"><p>Left to spend</p><strong id="balance">£0.00</strong><small id="detail">Add income and expenses to get started.</small></article>
+        <article><p>Income</p><strong id="income">£0.00</strong><small id="income-detail">No income recorded yet</small><button class="tile-add add" data-type="income" type="button">+ Add income</button></article>
+        <article><p>Spent</p><strong id="spent">£0.00</strong><small id="spent-detail">No expenses recorded yet</small><button class="tile-add add" data-type="expense" type="button">+ Add expense</button></article>
+        <article class="left"><p>Left to spend <span id="period-context"></span></p><strong id="balance">£0.00</strong><small id="detail">Add income and expenses to get started.</small><span id="left-status" class="left-status"></span></article>
       </section>
       <section class="panels">
         <article><div class="heading"><div><small>Where it went</small><h2>Spending breakdown</h2></div><span id="total" hidden></span></div><div id="breakdown"></div></article>
-        <article><div class="heading"><div><small>Your activity</small><h2>Recent transactions</h2></div></div><div id="transactions"></div></article>
+        <article><div class="heading"><div><small>Your activity</small><h2>Transactions</h2></div></div><div id="transactions"></div></article>
       </section>
     </section>
   </main>
   <dialog id="dialog"><form id="form"><div class="heading"><div><small id="form-note">New entry</small><h2 id="form-title">Add a transaction</h2></div><button type="button" id="close">×</button></div><input id="id" type="hidden"><input id="type" type="hidden"><label>Amount<input id="amount" inputmode="decimal" placeholder="£ 0.00" required></label><label>Category<select id="category"></select></label><label class="repeat-field"><input id="repeat-monthly" type="checkbox">Repeat monthly</label><label id="monthly-day-field" hidden>Payment day<select id="monthly-day"></select></label><label id="date-field">Date<input id="date" type="date" required></label><label>Note <em>optional</em><input id="note" maxlength="60" placeholder="What was this for?"></label><footer><button id="delete" type="button">Delete</button><div class="form-actions"><button id="save-another" type="submit">Save &amp; add another</button><button>Save transaction</button></div></footer></form></dialog>
-  <dialog id="tab-dialog"><form id="tab-form"><div class="heading"><div><small>New money tab</small><h2>Name this tab</h2></div><button type="button" id="close-tab">×</button></div><label>Name<input id="tab-name" maxlength="40" placeholder="e.g. Holiday" required></label><footer><span></span><button>Create tab</button></footer></form></dialog>
-  <script src="supabase/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=24"></script>
+  <dialog id="tab-dialog"><form id="tab-form"><div class="heading"><div><small>New money space</small><h2>Name this space</h2></div><button type="button" id="close-tab">×</button></div><label>Name<input id="tab-name" maxlength="40" placeholder="e.g. Holiday" required></label><footer><span></span><button>Create space</button></footer></form></dialog>
+  <script src="supabase/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=25"></script>
 </body></html>
