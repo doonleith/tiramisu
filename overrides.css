@@ -20,6 +20,9 @@ header > p { position: relative; top: 4px; }
 .repeat-field { display: flex !important; align-items: center; gap: 9px; cursor: pointer; }
 .repeat-field input { display: inline !important; width: 17px !important; margin: 0 !important; accent-color: var(--blue-deep); }
 #category, #monthly-day { width: 100% !important; height: 43px; }
+.form-actions { display: flex; gap: 8px; }
+#save-another { background: #fff; color: var(--ink); }
+#save-another:hover { background: var(--blue); border-color: var(--blue); }
 .cards { grid-template-columns: repeat(3, 1fr); }
 .tile-add { align-self: flex-start; margin-top: 16px; padding: 7px 10px; color: var(--blue-deep); background: var(--paper); transition: background .18s ease, border-color .18s ease; }
 .tile-add:hover { background: var(--blue); border-color: var(--blue); }
