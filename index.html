@@ -1,1 +1,60 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Clear — Finance</title><link rel="stylesheet" href="styles.css"></head><body><main><header><b>clear<span>.</span></b><p>Know where your money went this month in under 10 seconds.</p><button id="sign-in">Continue with Google</button><div id="user" hidden><span id="name"></span><button id="sign-out">Sign out</button></div></header><section class="hero"><div><small id="period">This month</small><h1>Your money,<br><i>made clear.</i></h1></div><div><button id="prev">←</button><button id="month"></button><button id="next">→</button></div></section><section class="cards"><article class="left"><p>Left to spend</p><strong id="balance">£0.00</strong><small id="detail">Sign in to start tracking.</small></article><article><p>Income</p><strong id="income">£0.00</strong><small>Money in this month</small></article><article><p>Spent</p><strong id="spent">£0.00</strong><small>Money out this month</small></article></section><section class="panels"><article><div class="heading"><div><small>Where it went</small><h2>Spending breakdown</h2></div><span id="total">£0 spent</span></div><div id="breakdown"></div></article><article><div class="heading"><div><small>Your activity</small><h2>Recent transactions</h2></div><button class="add">+ Add</button></div><div id="transactions"></div></article></section></main><dialog id="dialog"><form id="form"><div class="heading"><div><small id="form-note">New entry</small><h2 id="form-title">Add a transaction</h2></div><button type="button" id="close">×</button></div><input id="id" type="hidden"><fieldset><label><input type="radio" name="type" value="expense" checked>Expense</label><label><input type="radio" name="type" value="income">Income</label></fieldset><label>Amount<input id="amount" inputmode="decimal" placeholder="£ 0.00" required></label><label>Category<select id="category"></select></label><label>Date<input id="date" type="date" required></label><label>Note <em>optional</em><input id="note" maxlength="60" placeholder="What was this for?"></label><footer><button id="delete" type="button">Delete</button><button>Save transaction</button></footer></form></dialog><script src="supabase/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#202128">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icon-192.svg">
+  <title>Tiramisu — Personal finance</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <a class="brand" href="./" aria-label="Tiramisu home">tiramisu<span>.</span></a>
+      <p>Know where your money went this month in under 10 seconds.</p>
+      <button id="sign-in">Continue with Google</button>
+      <div id="user" hidden><span id="name"></span><button id="sign-out">Sign out</button></div>
+    </header>
+
+    <section id="landing" class="landing">
+      <div class="landing-copy">
+        <small>Personal finance, without the noise</small>
+        <h1>Every pound,<br><i>in its place.</i></h1>
+        <p>Track what comes in, what goes out, and what is left — all in one calm, private space.</p>
+        <button class="hero-button" id="landing-sign-in">Start tracking with Google <span>→</span></button>
+        <p class="privacy-note">Private by default. Your data is only yours.</p>
+      </div>
+      <div class="landing-preview" aria-hidden="true">
+        <div class="preview-top"><span>July</span><b>£1,284.50</b><small>left to spend</small></div>
+        <div class="preview-bar"><span></span></div>
+        <div class="preview-item"><i class="grocery">🛒</i><span>Groceries</span><b>£246.12</b></div>
+        <div class="preview-item"><i class="coffee">☕</i><span>Eating out</span><b>£87.50</b></div>
+        <div class="preview-item"><i class="travel">↗</i><span>Transport</span><b>£64.00</b></div>
+        <div class="preview-line"></div>
+        <p>Clear, not complicated.</p>
+      </div>
+    </section>
+
+    <section id="app-view" hidden>
+      <section class="hero">
+        <div><small id="period">This month</small><h1>Your money,<br><i>made clear.</i></h1></div>
+        <div><button id="prev">←</button><button id="month"></button><button id="next">→</button></div>
+      </section>
+      <section class="cards">
+        <article class="left"><p>Left to spend</p><strong id="balance">£0.00</strong><small id="detail">Add income and expenses to get started.</small></article>
+        <article><p>Income</p><strong id="income">£0.00</strong><small>Money in this month</small></article>
+        <article><p>Spent</p><strong id="spent">£0.00</strong><small>Money out this month</small></article>
+      </section>
+      <section class="panels">
+        <article><div class="heading"><div><small>Where it went</small><h2>Spending breakdown</h2></div><span id="total">£0 spent</span></div><div id="breakdown"></div></article>
+        <article><div class="heading"><div><small>Your activity</small><h2>Recent transactions</h2></div><button class="add">+ Add</button></div><div id="transactions"></div></article>
+      </section>
+    </section>
+  </main>
+  <dialog id="dialog"><form id="form"><div class="heading"><div><small id="form-note">New entry</small><h2 id="form-title">Add a transaction</h2></div><button type="button" id="close">×</button></div><input id="id" type="hidden"><fieldset><label><input type="radio" name="type" value="expense" checked>Expense</label><label><input type="radio" name="type" value="income">Income</label></fieldset><label>Amount<input id="amount" inputmode="decimal" placeholder="£ 0.00" required></label><label>Category<select id="category"></select></label><label>Date<input id="date" type="date" required></label><label>Note <em>optional</em><input id="note" maxlength="60" placeholder="What was this for?"></label><footer><button id="delete" type="button">Delete</button><button>Save transaction</button></footer></form></dialog>
+  <script src="supabase/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script>
+</body></html>
