@@ -1,4 +1,5 @@
 [hidden] { display: none !important; }
+.brand span { color: var(--blue); }
 #user { display: flex; align-items: center; gap: 28px; }
 header > p { position: relative; top: 4px; }
 .repeat-field { display: flex !important; align-items: center; gap: 9px; cursor: pointer; }
