@@ -2,6 +2,7 @@
 .brand span { color: var(--blue); }
 #user { display: flex; align-items: center; gap: 28px; }
 header > p { position: relative; top: 4px; }
+#app-view { padding-top: 30px; }
 .repeat-field { display: flex !important; align-items: center; gap: 9px; cursor: pointer; }
 .repeat-field input { display: inline !important; width: 17px !important; margin: 0 !important; accent-color: var(--blue-deep); }
 .cards { grid-template-columns: repeat(3, 1fr); }
