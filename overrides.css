@@ -1,11 +1,11 @@
 [hidden] { display: none !important; }
-#user { gap: 28px; }
-header > p { position: relative; top: 3px; }
+#user { display: flex; align-items: center; gap: 28px; }
+header > p { position: relative; top: 4px; }
 .repeat-field { display: flex !important; align-items: center; gap: 9px; cursor: pointer; }
 .repeat-field input { display: inline !important; width: 17px !important; margin: 0 !important; accent-color: var(--blue-deep); }
 .cards { grid-template-columns: repeat(3, 1fr); }
-.summary-action { grid-column: 1 / -1; min-height: 92px; border: 0; background: var(--blue); color: var(--ink); font-size: 17px; letter-spacing: -.02em; }
-.summary-action:hover { background: #a7d8f7; }
+.summary-action { grid-column: 1 / -1; min-height: 92px; border: 1px solid var(--line); background: #fff; color: var(--ink); font-size: 17px; letter-spacing: -.02em; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+.summary-action:hover { background: var(--blue); border-color: var(--blue); transform: translateY(-2px); }
 @media (max-width: 760px) {
   .summary-action { min-height: 130px; }
 }
