@@ -28,6 +28,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .preview-icon { width: 40px; height: 40px; }
 .housing { background: #b9a4f838; }
 .energy { background: #f1c76138; }
+.disposable { background: #98b9f538; }
 .savings { background: #9bd7ba38; }
 .repeat-field { display: flex !important; align-items: center; gap: 9px; cursor: pointer; }
 .repeat-field input { display: inline !important; width: 17px !important; margin: 0 !important; accent-color: var(--blue-deep); }
