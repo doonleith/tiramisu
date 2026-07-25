@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/icon-192.svg">
   <title>Tiramisu — Personal finance</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="overrides.css?v=10">
+  <link rel="stylesheet" href="overrides.css?v=11">
 </head>
 <body>
   <main>
@@ -53,5 +53,5 @@
   </main>
   <dialog id="dialog"><form id="form"><div class="heading"><div><small id="form-note">New entry</small><h2 id="form-title">Add a transaction</h2></div><button type="button" id="close">×</button></div><input id="id" type="hidden"><input id="type" type="hidden"><label>Amount<input id="amount" inputmode="decimal" placeholder="£ 0.00" required></label><label>Category<select id="category"></select></label><label id="date-field">Date<input id="date" type="date" required></label><label>Note <em>optional</em><input id="note" maxlength="60" placeholder="What was this for?"></label><label class="repeat-field"><input id="repeat-monthly" type="checkbox">Repeat monthly</label><label id="monthly-day-field" hidden>Payment day<select id="monthly-day"></select></label><footer><button id="delete" type="button">Delete</button><button>Save transaction</button></footer></form></dialog>
   <dialog id="tab-dialog"><form id="tab-form"><div class="heading"><div><small>New money tab</small><h2>Name this tab</h2></div><button type="button" id="close-tab">×</button></div><label>Name<input id="tab-name" maxlength="40" placeholder="e.g. Holiday" required></label><footer><span></span><button>Create tab</button></footer></form></dialog>
-  <script src="supabase/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=22"></script>
+  <script src="supabase/config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js?v=23"></script>
 </body></html>
