@@ -1,0 +1,9 @@
+<!-- Tiramisu mobile app icon — scalable SVG, 1024 × 1024 viewBox -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Tiramisu app icon</title>
+  <desc id="desc">A dark lowercase t with a light blue dot on a pale blue rounded square.</desc>
+  <rect width="1024" height="1024" rx="228" fill="#E7F1FF"/>
+  <!-- Custom, deliberately compact lowercase t: avoids a font dependency. -->
+  <path d="M458 226c0-33.1 26.9-60 60-60s60 26.9 60 60v154h144c33.1 0 60 26.9 60 60s-26.9 60-60 60H578v160c0 48.6 20.8 72 64 72 19.8 0 37.4-3.8 52.5-10.5 29.7-13.1 64.6.3 77.7 30s-.3 64.6-30 77.7C708.7 834.3 675.8 842 638 842c-117.8 0-180-68.7-180-182V500H344c-33.1 0-60-26.9-60-60s26.9-60 60-60h114Z" fill="#20212A"/>
+  <circle cx="790" cy="778" r="53" fill="#A9DCFF"/>
+</svg>
