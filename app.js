@@ -37,7 +37,6 @@ function render(){
 async function loadLedgers(){let {data,error}=await client.from('ledgers').select('*').order('created_at');if(error)throw error;if(!data.length){const result=await client.from('ledgers').insert({user_id:user.id,name:'Personal'}).select().single();if(result.error)throw result.error;data=[result.data]}ledgers=data;const saved=localStorage.getItem('tiramisu-active-ledger');activeLedgerId=ledgers.some(ledger=>ledger.id===saved)?saved:ledgers[0].id;localStorage.setItem('tiramisu-active-ledger',activeLedgerId);renderTabs()}
 
 async function materializeRecurring(){
-  if(!isCurrentPeriod())return;
   const {data:rules,error}=await client.from('recurring_transactions').select('*').eq('active',true).eq('ledger_id',activeLedgerId);if(error)throw error;
   const {data:existing,error:transactionError}=await client.from('transactions').select('recurring_transaction_id,transaction_date').eq('ledger_id',activeLedgerId);if(transactionError)throw transactionError;
   const keys=new Set(existing.filter(item=>item.recurring_transaction_id).map(item=>`${item.recurring_transaction_id}:${item.transaction_date}`));
