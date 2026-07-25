@@ -7,6 +7,7 @@ header > p { position: relative; top: 4px; }
 .google-sign-in img { display: block; width: 180px; height: 40px; }
 .google-sign-in:focus-visible { outline: 3px solid var(--blue-deep); outline-offset: 3px; }
 .landing-copy > p:not(.privacy-note) { margin-bottom: 18px; }
+.landing { padding-top: 46px; }
 .housing { background: #b9a4f838; }
 .energy { background: #f1c76138; }
 .savings { background: #9bd7ba38; }
@@ -15,3 +16,6 @@ header > p { position: relative; top: 4px; }
 .cards { grid-template-columns: repeat(3, 1fr); }
 .tile-add { align-self: flex-start; margin-top: 16px; padding: 7px 10px; color: var(--blue-deep); background: var(--paper); transition: background .18s ease, border-color .18s ease; }
 .tile-add:hover { background: var(--blue); border-color: var(--blue); }
+@media (max-width: 760px) {
+  .landing { padding-top: 54px; }
+}
