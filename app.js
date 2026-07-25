@@ -10,7 +10,7 @@ function monthKey(){return `${month.getFullYear()}-${String(month.getMonth()+1).
 function periodName(){return month.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}
 function monthTransactions(){return transactions.filter(transaction=>transaction.date.startsWith(monthKey()))}
 function isCurrentPeriod(){const today=new Date();return today.getFullYear()===month.getFullYear()&&today.getMonth()===month.getMonth()}
-function iconSvg(iconId){return `<svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/tiramisu-category-icons.svg?v=7#${iconId}"></use></svg>`}
+function iconSvg(iconId){return `<svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/tiramisu-category-icons.svg?v=8#${iconId}"></use></svg>`}
 function renderCategoryIcon(category,type){const[,colour,iconId]=categoryInfo(category,type);$('category-icon').style.background=`${colour}38`;$('category-icon').innerHTML=iconSvg(iconId)}
 function fillCategories(type,selected){const options=categories[type],choices=selected&&!options.some(([name])=>name===selected)?[...options,[selected,'#b9b6ae','other']]:options;$('category').innerHTML=choices.map(([name])=>`<option ${name===selected?'selected':''}>${name}</option>`).join('');renderCategoryIcon($('category').value,type)}
 function ordinal(day){const endings=['th','st','nd','rd'],remainder=day%100;return `${day}${endings[(remainder-20)%10]||endings[remainder]||endings[0]}`}
