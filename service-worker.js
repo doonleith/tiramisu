@@ -1,5 +1,5 @@
-const CACHE = 'tiramisu-shell-v12';
-const SHELL = ['./','./index.html','./styles.css','./overrides.css','./app.js?v=12','./manifest.webmanifest','./assets/icon-192.svg','./assets/icon-512.svg'];
+const CACHE = 'tiramisu-shell-v13';
+const SHELL = ['./','./index.html','./styles.css','./overrides.css','./app.js?v=13','./manifest.webmanifest','./assets/icon-192.svg','./assets/icon-512.svg'];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', event => {
