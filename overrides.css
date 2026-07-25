@@ -3,6 +3,9 @@
 #user { display: flex; align-items: center; gap: 28px; }
 header > p { position: relative; top: 4px; }
 #app-view { padding-top: 30px; }
+.housing { background: #b9a4f838; }
+.energy { background: #f1c76138; }
+.savings { background: #9bd7ba38; }
 .repeat-field { display: flex !important; align-items: center; gap: 9px; cursor: pointer; }
 .repeat-field input { display: inline !important; width: 17px !important; margin: 0 !important; accent-color: var(--blue-deep); }
 .cards { grid-template-columns: repeat(3, 1fr); }
