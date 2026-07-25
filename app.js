@@ -1,4 +1,4 @@
-const categories={expense:[['Groceries','🛒','#9bd7ba'],['Eating out','☕','#ffb07c'],['Transport','↗','#98b9f5'],['Bills','⌁','#b9a4f8'],['Shopping','□','#ff8566'],['Entertainment','◒','#f1c761'],['Health','+','#78c8c8'],['Other','·','#b9b6ae']],income:[['Salary','↗','#9bd7ba'],['Freelance','✦','#98b9f5'],['Gift','♡','#ffb07c'],['Other','·','#b9b6ae']]};
+const categories={expense:[['Rent / mortgage','⌂','#b9a4f8'],['Council tax','⌁','#98b9f5'],['Gas & electric','⚡','#f1c761'],['Water','≈','#78c8c8'],['Internet & mobile','◌','#98b9f5'],['Insurance','◇','#ffb07c'],['Debt payments','↘','#ff8566'],['Savings','✦','#9bd7ba'],['Subscriptions','◒','#b9a4f8'],['Groceries','🛒','#9bd7ba'],['Transport','↗','#98b9f5'],['Health','+','#78c8c8'],['Other','·','#b9b6ae']],income:[['Salary','↗','#9bd7ba'],['Freelance','✦','#98b9f5'],['Benefits','+','#b9a4f8'],['Interest','◌','#f1c761'],['Other','·','#b9b6ae']]};
 const $=id=>document.getElementById(id);
 const money=value=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP'}).format(value);
 const localDate=(date=new Date())=>{const offset=date.getTimezoneOffset()*60000;return new Date(date.getTime()-offset).toISOString().slice(0,10)};
@@ -8,7 +8,7 @@ let month=new Date(),transactions=[],client,user;month.setDate(1);
 
 function monthKey(){return `${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}`}
 function monthTransactions(){return transactions.filter(transaction=>transaction.date.startsWith(monthKey()))}
-function fillCategories(type,selected){$('category').innerHTML=categories[type].map(([name])=>`<option ${name===selected?'selected':''}>${name}</option>`).join('')}
+function fillCategories(type,selected){const options=categories[type],choices=selected&&!options.some(([name])=>name===selected)?[...options,[selected,'·','#b9b6ae']]:options;$('category').innerHTML=choices.map(([name])=>`<option ${name===selected?'selected':''}>${name}</option>`).join('')}
 function recurringDate(rule){const start=new Date(`${rule.start_date}T12:00:00`),year=month.getFullYear(),monthIndex=month.getMonth();if(new Date(year,monthIndex+1,0)<start)return null;const lastDay=new Date(year,monthIndex+1,0).getDate();return localDate(new Date(year,monthIndex,Math.min(start.getDate(),lastDay),12))}
 
 function render(){
