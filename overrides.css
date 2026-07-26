@@ -75,8 +75,9 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-dialog::backdrop { background: #2021284d; }
 .misu-dialog > section { display: grid; grid-template-rows: auto minmax(180px,1fr) auto auto auto; max-height: inherit; }
 .misu-dialog header { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid var(--line); }
-.misu-title { display: flex; align-items: center; gap: 10px; }
-.misu-title img { width: 68px; height: 68px; object-fit: contain; border-radius: 0; background: transparent; }
+.misu-title { position: relative; display: flex; align-items: center; gap: 10px; }
+.misu-title img { width: 68px; height: 68px; object-fit: contain; border-radius: 0; background: transparent; transition: transform .24s ease; }
+.misu-title::after { content: '✦'; position: absolute; top: 6px; left: 51px; color: var(--blue-deep); font-size: 14px; opacity: .7; transform: scale(.82); transition: transform .24s ease, opacity .24s ease; pointer-events: none; }
 .misu-title small { display: block; color: var(--muted); font-size: 11px; }
 .misu-title h2 { margin: 1px 0 0; font-size: 21px; }
 #misu-close { padding: 5px 9px; background: transparent; font-size: 23px; line-height: 1; }
@@ -96,6 +97,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-form input { flex: 1; min-width: 0; margin: 0; }
 .misu-form button { flex: 0 0 auto; padding: 8px 12px; }
 .misu-note { margin: 0; padding: 0 18px 16px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) { .misu-title:hover img { transform: translateY(-3px) rotate(-3deg); } .misu-title:hover::after { opacity: 1; transform: translate(2px,-2px) scale(1.2) rotate(12deg); } }
 @media (max-width: 760px) {
   .landing { min-height: auto; padding-top: 32px; }
   .header-misu { width: 54px; height: 54px; margin: -6px 0 -11px; }
