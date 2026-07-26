@@ -302,16 +302,31 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
     min-height: 44px;
   }
 
+  #close,
+  #close-tab,
+  #misu-close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    padding: 0;
+    border-radius: 9px;
+  }
+
   .misu-dialog {
-    top: max(12px, env(safe-area-inset-top));
-    bottom: auto;
-    max-height: calc(100dvh - 24px);
-    margin: 0 auto;
+    inset: max(24px, calc(env(safe-area-inset-top) + 12px)) 12px auto;
+    max-height: calc(100dvh - 36px);
+    margin: 0 auto !important;
   }
 
   .misu-dialog > section {
     grid-template-rows: auto minmax(0, 1fr) auto auto auto;
-    max-height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 36px);
+  }
+
+  .misu-dialog header {
+    padding-top: 22px;
   }
 
   .misu-messages {
