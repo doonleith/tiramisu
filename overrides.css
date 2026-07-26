@@ -3,6 +3,10 @@
 .brand span { color: var(--blue); }
 #user { display: flex; align-items: center; gap: 28px; }
 header > p { position: relative; top: 4px; color: #5d5b64; }
+.header-misu { position: relative; display: grid; place-items: end center; width: 68px; height: 68px; margin: -10px 0 -14px; cursor: default; }
+.header-misu img { width: 64px; height: 64px; object-fit: contain; transition: transform .24s ease; }
+.header-misu::after { content: '✦'; position: absolute; top: 7px; right: 3px; color: var(--blue-deep); font-size: 15px; opacity: .7; transform: scale(.82); transition: transform .24s ease, opacity .24s ease; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) { .header-misu:hover img { transform: translateY(-3px) rotate(-3deg); } .header-misu:hover::after { opacity: 1; transform: translate(2px,-2px) scale(1.2) rotate(12deg); } }
 button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(--blue-deep); outline-offset: 3px; }
 #app-view { padding-top: 30px; }
 .dashboard-toolbar { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 14px; margin-bottom: 14px; }
@@ -94,6 +98,9 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-note { margin: 0; padding: 0 18px 16px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 @media (max-width: 760px) {
   .landing { min-height: auto; padding-top: 32px; }
+  .header-misu { width: 54px; height: 54px; margin: -6px 0 -11px; }
+  .header-misu img { width: 52px; height: 52px; }
+  .header-misu::after { top: 4px; right: 0; font-size: 12px; }
   .misu-home { grid-template-columns: 1fr; gap: 18px; margin: 4px 0 42px; padding: 27px 23px 30px; text-align: center; }
   .misu-home-copy { margin: 0 auto; }
   .misu-home-art { order: -1; justify-self: center; }
