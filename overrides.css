@@ -266,6 +266,67 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
     font-size: 17px;
   }
 
+  dialog {
+    width: calc(100% - 24px);
+    max-height: calc(100dvh - 24px);
+    margin: auto;
+    padding: 0;
+    border-radius: 18px;
+  }
+
+  dialog > form {
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 20px;
+  }
+
+  dialog form input,
+  dialog form select,
+  .misu-form input {
+    min-height: 46px;
+    font-size: 16px;
+  }
+
+  dialog form footer {
+    position: sticky;
+    bottom: -20px;
+    z-index: 1;
+    margin: 18px -20px -20px;
+    padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: #fff;
+  }
+
+  dialog form footer button {
+    min-height: 44px;
+  }
+
+  .misu-dialog {
+    top: max(12px, env(safe-area-inset-top));
+    bottom: auto;
+    max-height: calc(100dvh - 24px);
+    margin: 0 auto;
+  }
+
+  .misu-dialog > section {
+    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+    max-height: calc(100dvh - 24px);
+  }
+
+  .misu-messages {
+    min-height: 0;
+    max-height: none;
+  }
+
+  .misu-form {
+    align-items: center;
+  }
+
+  .misu-form button {
+    min-height: 44px;
+  }
+
   #app-view {
     padding-top: 18px;
     padding-bottom: 76px;
