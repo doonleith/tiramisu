@@ -29,7 +29,7 @@ The production site is published through GitHub Pages:
 | Hosting | GitHub Pages from the repository’s default branch |
 | PWA shell | `manifest.webmanifest`; the current service worker deliberately unregisters itself to avoid stale cached versions |
 
-More detail is in [docs/architecture.md](docs/architecture.md).
+Internal technical documentation is maintained separately from this public repository.
 
 ## Repository layout
 
