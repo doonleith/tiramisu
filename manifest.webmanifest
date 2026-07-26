@@ -7,7 +7,17 @@
   "background_color": "#faf9f6",
   "theme_color": "#202128",
   "icons": [
-    {"src":"assets/tiramisu-app-icon.svg","sizes":"192x192","type":"image/svg+xml","purpose":"any"},
-    {"src":"assets/tiramisu-app-icon.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any"}
+    {
+      "src": "assets/misu-app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/misu-app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
