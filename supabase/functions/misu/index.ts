@@ -9,7 +9,8 @@ const categories = {
 const tools = [
   { type: "function", function: { name: "get_month_summary", description: "Get total income, spending, and left to spend for a month in the active money space.", parameters: { type: "object", properties: { month: { type: "string", description: "Month in YYYY-MM format." } }, required: ["month"], additionalProperties: false } } },
   { type: "function", function: { name: "get_spending_breakdown", description: "Get expense category totals for a month in the active money space.", parameters: { type: "object", properties: { month: { type: "string", description: "Month in YYYY-MM format." } }, required: ["month"], additionalProperties: false } } },
-  { type: "function", function: { name: "find_transactions", description: "Find transactions in the active money space. Use this for questions about specific purchases or payments.", parameters: { type: "object", properties: { month: { type: "string", description: "Month in YYYY-MM format." }, query: { type: "string", description: "A word or short phrase to match against transaction notes and categories." }, type: { type: "string", enum: ["income", "expense"] } }, required: ["month"], additionalProperties: false } } },
+  { type: "function", function: { name: "find_transactions", description: "Find and total recorded transactions in the active money space over a month or date range. Use date ranges for questions such as last 12 months, this year, annual spending, averages, or a specific merchant.", parameters: { type: "object", properties: { month: { type: "string", description: "A single month in YYYY-MM format. Do not combine with start_date or end_date." }, start_date: { type: "string", description: "Inclusive start date in YYYY-MM-DD format." }, end_date: { type: "string", description: "Inclusive end date in YYYY-MM-DD format." }, query: { type: "string", description: "A word or short phrase to match case-insensitively against transaction notes and categories." }, type: { type: "string", enum: ["income", "expense"] } }, additionalProperties: false } } },
+  { type: "function", function: { name: "get_recurring_payments", description: "Find active monthly recurring payments and calculate their deterministic monthly and annual projections. Use this when the user asks what a subscription or repeating payment costs per year.", parameters: { type: "object", properties: { query: { type: "string", description: "A word or short phrase to match case-insensitively against recurring-payment notes and categories." }, type: { type: "string", enum: ["income", "expense"] } }, additionalProperties: false } } },
   { type: "function", function: { name: "draft_transaction", description: "Prepare, but never save, a transaction after the user asks to add one. Ask a concise follow-up only when the amount, type, or category is missing. Default to today and a one-off transaction unless the user says otherwise.", parameters: { type: "object", properties: { type: { type: "string", enum: ["income", "expense"] }, amount: { type: "number", minimum: 0.01 }, category: { type: "string" }, date: { type: "string", description: "Date in YYYY-MM-DD format. Omit to use today." }, note: { type: "string" }, repeat_monthly: { type: "boolean", description: "True only when the user explicitly requests a monthly transaction; otherwise false or omitted." }, payment_day: { type: "integer", minimum: 1, maximum: 31 } }, required: ["type", "amount", "category"], additionalProperties: false } } },
 ];
 
@@ -23,6 +24,10 @@ function cors(req: Request) {
 function response(req: Request, body: unknown, status = 200) { return new Response(JSON.stringify(body), { status, headers: cors(req) }); }
 function monthRange(month: string) { const [year, number] = month.split("-").map(Number); return { start: `${month}-01`, end: new Date(Date.UTC(year, number, 1)).toISOString().slice(0, 10) }; }
 function safeMonth(month: unknown) { return typeof month === "string" && monthPattern.test(month) ? month : null; }
+function safeDate(date: unknown) { return typeof date === "string" && datePattern.test(date) ? date : null; }
+function addDay(date: string) { const value = new Date(`${date}T00:00:00Z`); value.setUTCDate(value.getUTCDate() + 1); return value.toISOString().slice(0, 10); }
+function subtractDay(date: string) { const value = new Date(`${date}T00:00:00Z`); value.setUTCDate(value.getUTCDate() - 1); return value.toISOString().slice(0, 10); }
+function rounded(value: number) { return Math.round(value * 100) / 100; }
 function publishableKey() {
   const direct = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
   if (direct) return direct;
@@ -63,34 +68,68 @@ Deno.serve(async (req) => {
 
     let draft: Draft | null = null;
     const executeTool = async (name: string, input: Record<string, unknown>) => {
-      const month = safeMonth(input.month);
       if (name === "draft_transaction") {
         const checked = safeDraft(input);
         if (!checked) return { error: "The draft needs a valid type, amount, category, and date. Ask the user for the missing detail." };
         draft = checked;
         return { status: "draft_ready", draft: checked };
       }
-      if (!month) return { error: "Use a month in YYYY-MM format." };
-      const { start, end } = monthRange(month);
+      const query = typeof input.query === "string" ? input.query.toLowerCase().trim() : "";
+      const type = input.type === "income" || input.type === "expense" ? input.type : null;
+      if (name === "get_recurring_payments") {
+        const { data, error } = await supabase.from("recurring_transactions").select("type,amount,category,note,start_date").eq("ledger_id", ledgerId).eq("active", true);
+        if (error) return { error: "Could not retrieve recurring payments." };
+        const payments = (data || []).filter((item) => (!type || item.type === type) && (!query || `${item.category} ${item.note || ""}`.toLowerCase().includes(query))).map((item) => ({
+          type: item.type,
+          category: item.category,
+          note: item.note || "",
+          start_date: item.start_date,
+          monthly_amount: Number(item.amount),
+          annual_projection: rounded(Number(item.amount) * 12),
+        }));
+        return {
+          basis: "active monthly recurring payments",
+          payments,
+          count: payments.length,
+          monthly_total: rounded(payments.reduce((sum, item) => sum + item.monthly_amount, 0)),
+          annual_projection: rounded(payments.reduce((sum, item) => sum + item.annual_projection, 0)),
+        };
+      }
+      const month = safeMonth(input.month);
+      const requestedStart = safeDate(input.start_date);
+      const requestedEnd = safeDate(input.end_date);
+      if ((name === "get_month_summary" || name === "get_spending_breakdown") && !month) return { error: "Use a month in YYYY-MM format." };
+      if (name === "find_transactions" && !month && (!requestedStart || !requestedEnd)) return { error: "Provide either one month, or both start_date and end_date. Explain this limitation clearly if the range cannot be determined." };
+      if (requestedStart && requestedEnd && requestedStart > requestedEnd) return { error: "The start date must not be after the end date." };
+      const range = month ? monthRange(month) : { start: requestedStart!, end: addDay(requestedEnd!) };
+      const { start, end } = range;
       const { data, error } = await supabase.from("transactions").select("type,amount,category,note,transaction_date").eq("ledger_id", ledgerId).gte("transaction_date", start).lt("transaction_date", end).order("transaction_date", { ascending: false });
       if (error) return { error: "Could not retrieve transactions." };
       const rows = data || [];
       if (name === "get_month_summary") {
         const income = rows.filter((item) => item.type === "income").reduce((sum, item) => sum + Number(item.amount), 0);
         const spent = rows.filter((item) => item.type === "expense").reduce((sum, item) => sum + Number(item.amount), 0);
-        return { month, income, spent, left_to_spend: income - spent, entries: rows.length };
+        return { month, income: rounded(income), spent: rounded(spent), left_to_spend: rounded(income - spent), entries: rows.length };
       }
       if (name === "get_spending_breakdown") {
         const breakdown: Record<string, number> = {};
         rows.filter((item) => item.type === "expense").forEach((item) => breakdown[item.category] = (breakdown[item.category] || 0) + Number(item.amount));
         return { month, categories: Object.entries(breakdown).sort((a, b) => b[1] - a[1]).map(([category, amount]) => ({ category, amount })) };
       }
-      const query = typeof input.query === "string" ? input.query.toLowerCase().trim() : "";
-      const type = input.type === "income" || input.type === "expense" ? input.type : null;
-      return { month, transactions: rows.filter((item) => (!type || item.type === type) && (!query || `${item.category} ${item.note || ""}`.toLowerCase().includes(query))).slice(0, 20) };
+      const matches = rows.filter((item) => (!type || item.type === type) && (!query || `${item.category} ${item.note || ""}`.toLowerCase().includes(query)));
+      return {
+        basis: "recorded transactions",
+        start_date: start,
+        end_date: month ? subtractDay(end) : requestedEnd,
+        query,
+        count: matches.length,
+        total_amount: rounded(matches.reduce((sum, item) => sum + Number(item.amount), 0)),
+        transactions: matches.slice(0, 100),
+        truncated: matches.length > 100,
+      };
     };
 
-    const system = `You are Misu, a calm and concise personal-finance assistant for the money space “${ledger.name}”. Today's date is ${new Date().toISOString().slice(0, 10)}. You only know information returned by tools; never invent amounts or transactions. Use UK pounds and plain language without Markdown formatting. Use a read tool for every factual money question. When asked to add a transaction, ask only for a missing amount, type, or category, then call draft_transaction. Default to today and a one-off transaction unless the user explicitly requests monthly repetition. Never claim a draft is saved; tell the user it is ready to review and confirm. Do not offer financial, tax, credit, or investment advice.`;
+    const system = `You are Misu, a calm and concise personal-finance assistant for the money space “${ledger.name}”. Today's date is ${new Date().toISOString().slice(0, 10)}. You only know information returned by tools; never invent amounts or transactions. Use UK pounds and plain language without Markdown formatting. Use a read tool for every factual money question. Resolve short follow-ups such as “last 12 months” from the preceding conversation rather than asking the user to repeat the merchant or topic. Convert relative periods into exact dates before calling find_transactions. For “last 12 months”, use the inclusive period from one year before tomorrow through today. Distinguish recorded totals from recurring-payment projections explicitly. When asked broadly how much a named merchant, subscription, or repeating payment costs “a year” or “annually”, call both find_transactions for the last 12 months and get_recurring_payments, then report both the recorded total and current annual projection when available. When asked only what was actually spent, call find_transactions. When asked only for a projection, call get_recurring_payments. Calculations returned by tools are authoritative. If a tool returns an error or no matching data, explain specifically what is unavailable instead of giving a generic failure. When asked to add a transaction, ask only for a missing amount, type, or category, then call draft_transaction. Default to today and a one-off transaction unless the user explicitly requests monthly repetition. Never claim a draft is saved; tell the user it is ready to review and confirm. Do not offer financial, tax, credit, or investment advice.`;
     const groqMessages: Array<Record<string, unknown>> = [{ role: "system", content: system }, ...messages];
     const apiKey = Deno.env.get("GROQ_API_KEY");
     if (!apiKey) return response(req, { error: "Misu is not configured yet. Add GROQ_API_KEY to this project’s Edge Function secrets." }, 503);
