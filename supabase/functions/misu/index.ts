@@ -11,6 +11,7 @@ const tools = [
   { type: "function", function: { name: "get_spending_breakdown", description: "Get expense category totals for a month in the active money space.", parameters: { type: "object", properties: { month: { type: "string", description: "Month in YYYY-MM format." } }, required: ["month"], additionalProperties: false } } },
   { type: "function", function: { name: "find_transactions", description: "Find and total recorded transactions in the active money space over a month or date range. Use date ranges for questions such as last 12 months, this year, annual spending, averages, or a specific merchant.", parameters: { type: "object", properties: { month: { type: "string", description: "A single month in YYYY-MM format. Do not combine with start_date or end_date." }, start_date: { type: "string", description: "Inclusive start date in YYYY-MM-DD format." }, end_date: { type: "string", description: "Inclusive end date in YYYY-MM-DD format." }, query: { type: "string", description: "A word or short phrase to match case-insensitively against transaction notes and categories." }, type: { type: "string", enum: ["income", "expense"] } }, additionalProperties: false } } },
   { type: "function", function: { name: "get_recurring_payments", description: "Find active monthly recurring payments and calculate their deterministic monthly and annual projections. Use this when the user asks what a subscription or repeating payment costs per year.", parameters: { type: "object", properties: { query: { type: "string", description: "A word or short phrase to match case-insensitively against recurring-payment notes and categories." }, type: { type: "string", enum: ["income", "expense"] } }, additionalProperties: false } } },
+  { type: "function", function: { name: "analyse_savings_goal", description: "Calculate multi-month saving plans for a target and compare them with average recorded monthly headroom. Use this for questions about how much to save per month, how long a target may take, or whether a target fits recorded cash flow.", parameters: { type: "object", properties: { target: { type: "number", minimum: 0.01, maximum: 1000000 }, deadline_months: { type: "integer", minimum: 1, maximum: 120, description: "Number of months to reach the target, when the user provides a deadline." }, lookback_months: { type: "integer", minimum: 1, maximum: 24, description: "Months of recorded transactions to average. Default to 6." } }, required: ["target"], additionalProperties: false } } },
   { type: "function", function: { name: "draft_transaction", description: "Prepare, but never save, a transaction after the user asks to add one. Ask a concise follow-up only when the amount, type, or category is missing. Default to today and a one-off transaction unless the user says otherwise.", parameters: { type: "object", properties: { type: { type: "string", enum: ["income", "expense"] }, amount: { type: "number", minimum: 0.01 }, category: { type: "string" }, date: { type: "string", description: "Date in YYYY-MM-DD format. Omit to use today." }, note: { type: "string" }, repeat_monthly: { type: "boolean", description: "True only when the user explicitly requests a monthly transaction; otherwise false or omitted." }, payment_day: { type: "integer", minimum: 1, maximum: 31 } }, required: ["type", "amount", "category"], additionalProperties: false } } },
 ];
 
@@ -95,6 +96,53 @@ Deno.serve(async (req) => {
           annual_projection: rounded(payments.reduce((sum, item) => sum + item.annual_projection, 0)),
         };
       }
+      if (name === "analyse_savings_goal") {
+        const target = typeof input.target === "number" && Number.isFinite(input.target) && input.target >= .01 && input.target <= 1_000_000 ? rounded(input.target) : null;
+        if (!target) return { error: "Provide a valid savings target." };
+        const deadlineMonths = typeof input.deadline_months === "number" && Number.isInteger(input.deadline_months) && input.deadline_months >= 1 && input.deadline_months <= 120 ? input.deadline_months : null;
+        const lookbackMonths = typeof input.lookback_months === "number" && Number.isInteger(input.lookback_months) && input.lookback_months >= 1 && input.lookback_months <= 24 ? input.lookback_months : 6;
+        const today = new Date();
+        const start = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - lookbackMonths + 1, 1)).toISOString().slice(0, 10);
+        const end = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 1)).toISOString().slice(0, 10);
+        const { data, error } = await supabase.from("transactions").select("type,amount,transaction_date").eq("ledger_id", ledgerId).gte("transaction_date", start).lt("transaction_date", end);
+        if (error) return { error: "Could not retrieve transactions for the savings calculation." };
+        const months: Record<string, { income: number; spent: number; entries: number }> = {};
+        for (const item of data || []) {
+          const key = item.transaction_date.slice(0, 7);
+          months[key] ||= { income: 0, spent: 0, entries: 0 };
+          if (item.type === "income") months[key].income += Number(item.amount);
+          if (item.type === "expense") months[key].spent += Number(item.amount);
+          months[key].entries++;
+        }
+        const recordedMonths = Object.entries(months).sort(([a], [b]) => a.localeCompare(b)).map(([month, values]) => ({
+          month,
+          income: rounded(values.income),
+          spent: rounded(values.spent),
+          left_to_spend: rounded(values.income - values.spent),
+          entries: values.entries,
+        }));
+        const averageLeft = recordedMonths.length ? rounded(recordedMonths.reduce((sum, item) => sum + item.left_to_spend, 0) / recordedMonths.length) : null;
+        const planMonths = deadlineMonths ? [deadlineMonths] : [3, 6, 12];
+        const plans = planMonths.map((months) => {
+          const monthlyRequired = Math.ceil((target / months) * 100) / 100;
+          return {
+            months,
+            monthly_required: monthlyRequired,
+            fits_average_recorded_headroom: averageLeft === null ? null : monthlyRequired <= averageLeft,
+            average_headroom_after_saving: averageLeft === null ? null : rounded(averageLeft - monthlyRequired),
+          };
+        });
+        return {
+          basis: "recorded monthly income minus recorded monthly expenses",
+          target,
+          requested_lookback_months: lookbackMonths,
+          recorded_months_used: recordedMonths.length,
+          average_monthly_left_to_spend: averageLeft,
+          months: recordedMonths,
+          plans,
+          caveat: recordedMonths.length < 3 ? "Fewer than three months of recorded data are available, so affordability is only a rough indication." : "Past recorded headroom may not predict future affordability.",
+        };
+      }
       const month = safeMonth(input.month);
       const requestedStart = safeDate(input.start_date);
       const requestedEnd = safeDate(input.end_date);
@@ -129,7 +177,7 @@ Deno.serve(async (req) => {
       };
     };
 
-    const system = `You are Misu, a calm and concise personal-finance assistant for the money space “${ledger.name}”. Today's date is ${new Date().toISOString().slice(0, 10)}. You only know information returned by tools; never invent amounts or transactions. Use UK pounds and plain language without Markdown formatting. Use a read tool for every factual money question. Resolve short follow-ups such as “last 12 months” from the preceding conversation rather than asking the user to repeat the merchant or topic. Convert relative periods into exact dates before calling find_transactions. For “last 12 months”, use the inclusive period from one year before tomorrow through today. Distinguish recorded totals from recurring-payment projections explicitly. When asked broadly how much a named merchant, subscription, or repeating payment costs “a year” or “annually”, call both find_transactions for the last 12 months and get_recurring_payments, then report both the recorded total and current annual projection when available. When asked only what was actually spent, call find_transactions. When asked only for a projection, call get_recurring_payments. Calculations returned by tools are authoritative. If a tool returns an error or no matching data, explain specifically what is unavailable instead of giving a generic failure. When asked to add a transaction, ask only for a missing amount, type, or category, then call draft_transaction. Default to today and a one-off transaction unless the user explicitly requests monthly repetition. Never claim a draft is saved; tell the user it is ready to review and confirm. Do not offer financial, tax, credit, or investment advice.`;
+    const system = `You are Misu, a calm and concise personal-finance assistant for the money space “${ledger.name}”. Today's date is ${new Date().toISOString().slice(0, 10)}. You only know information returned by tools; never invent amounts or transactions. Use UK pounds and plain language without Markdown formatting. Use a read tool for every factual money question. Resolve short follow-ups such as “last 12 months” from the preceding conversation rather than asking the user to repeat the merchant or topic. Convert relative periods into exact dates before calling find_transactions. For “last 12 months”, use the inclusive period from one year before tomorrow through today. Distinguish recorded totals from recurring-payment projections explicitly. When asked broadly how much a named merchant, subscription, or repeating payment costs “a year” or “annually”, call both find_transactions for the last 12 months and get_recurring_payments, then report both the recorded total and current annual projection when available. When asked only what was actually spent, call find_transactions. When asked only for a projection, call get_recurring_payments. For a savings goal, never assume the entire target must be saved in one month. Call analyse_savings_goal. If no deadline is supplied, show concise 3-, 6-, and 12-month options and compare each with average recorded monthly headroom. If a deadline is supplied, calculate that plan. Describe affordability as an indication based on recorded cash flow, state how many months of data were used, and include the tool’s caveat. Calculations returned by tools are authoritative. If a tool returns an error or no matching data, explain specifically what is unavailable instead of giving a generic failure. When asked to add a transaction, ask only for a missing amount, type, or category, then call draft_transaction. Default to today and a one-off transaction unless the user explicitly requests monthly repetition. Never claim a draft is saved; tell the user it is ready to review and confirm. Do not offer financial, tax, credit, or investment advice.`;
     const groqMessages: Array<Record<string, unknown>> = [{ role: "system", content: system }, ...messages];
     const apiKey = Deno.env.get("GROQ_API_KEY");
     if (!apiKey) return response(req, { error: "Misu is not configured yet. Add GROQ_API_KEY to this project’s Edge Function secrets." }, 503);
