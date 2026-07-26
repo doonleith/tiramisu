@@ -49,7 +49,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .category-tile { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px; border-radius: 11px; }
 .category-tile svg { width: 24px; height: 24px; }
 .category-tile svg, .category-tile svg use { fill: none; stroke: #20212A; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.category-tile .disposable-income-art { display: block; width: 40px; height: 40px; }
+.category-tile .category-art { display: block; width: 40px; height: 40px; }
 .form-actions { display: flex; gap: 8px; }
 #save-another { background: #fff; color: var(--ink); }
 #save-another:hover { background: var(--blue); border-color: var(--blue); }
