@@ -72,7 +72,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-dialog > section { display: grid; grid-template-rows: auto minmax(180px,1fr) auto auto auto; max-height: inherit; }
 .misu-dialog header { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid var(--line); }
 .misu-title { display: flex; align-items: center; gap: 10px; }
-.misu-title img { width: 42px; height: 42px; object-fit: contain; border-radius: 13px; background: #e7f1ff; }
+.misu-title img { width: 68px; height: 68px; object-fit: contain; border-radius: 0; background: transparent; }
 .misu-title small { display: block; color: var(--muted); font-size: 11px; }
 .misu-title h2 { margin: 1px 0 0; font-size: 21px; }
 #misu-close { padding: 5px 9px; background: transparent; font-size: 23px; line-height: 1; }
