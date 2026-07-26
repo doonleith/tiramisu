@@ -14,7 +14,7 @@ Misu cannot access another user’s data or another money space. The Edge Functi
 
 1. Create a Groq API key in the Groq console. Use the Free plan for early testing.
 2. In Supabase, open the project, then **Edge Functions** > **Secrets**. Add a secret named `GROQ_API_KEY` and paste the value there. Do not put it in GitHub or the browser.
-3. In Supabase, select **Edge Functions** > **Deploy a new function** > **Via Editor**. Name the function `misu`.
+3. In Supabase, select **Edge Functions** > **Deploy a new function** > **Via Editor**. Name the function `Misu`.
 4. Copy the contents of [`supabase/functions/misu/index.ts`](../supabase/functions/misu/index.ts) into the editor.
 5. In the function’s settings, turn off the platform **Verify JWT** option. Misu verifies the signed-in user inside the function and uses that JWT for RLS-scoped database reads. This avoids compatibility issues with asymmetric Supabase signing keys.
 6. Deploy the function. The **Ask Misu** button in the signed-in app will then work.
