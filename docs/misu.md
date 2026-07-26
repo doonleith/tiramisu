@@ -7,6 +7,7 @@ Misu is Tiramisu’s in-app money assistant. It runs as a Supabase Edge Function
 - Answer questions about the active money space, including monthly totals, spending breakdowns, and matching transactions.
 - Search recorded transactions across a rolling date range, including “last 12 months” questions.
 - Distinguish recorded spending from the projected annual cost of active monthly payments.
+- Compare 3-, 6-, and 12-month savings-goal plans with average recorded monthly headroom.
 - Prepare an income or expense transaction from a conversational request.
 - Save nothing automatically: the user must select **Confirm & add** in the app.
 
@@ -29,6 +30,7 @@ The default model is `openai/gpt-oss-20b`. You can optionally set a `MISU_MODEL`
 - Database reads use the caller’s authenticated Supabase client rather than a service-role key.
 - A transaction draft is validated against Tiramisu’s category list, amount limits, and date format.
 - Date-range totals and recurring annual projections are calculated by the Edge Function rather than by the language model.
+- Savings-goal affordability is an indication based on recorded cash flow, and responses state how many months of data were available.
 - Only the web app’s **Confirm & add** button writes to `transactions` or `recurring_transactions`.
 - Misu does not provide investment, tax, credit, or other regulated financial advice.
 
