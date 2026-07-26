@@ -1,0 +1,2 @@
+[functions.misu]
+verify_jwt = false
