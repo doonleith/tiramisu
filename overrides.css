@@ -31,8 +31,9 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-home-copy { max-width: 500px; }
 .misu-home h2 { margin: 8px 0 13px; font: 600 clamp(36px,4vw,50px)/.98 Fraunces,serif; letter-spacing: -.055em; }
 .misu-home p { max-width: 470px; margin: 0; color: #5d6670; font-size: 16px; line-height: 1.55; }
-.misu-home-art { justify-self: end; width: 100%; }
-.misu-home-art img { display: block; width: min(100%,300px); height: auto; margin-left: auto; border-radius: 15px; }
+.misu-home-art { position: relative; justify-self: end; width: 100%; }
+.misu-home-art img { display: block; width: min(100%,300px); height: auto; margin-left: auto; transition: transform .24s ease; }
+.misu-home-art::after { content: '✦'; position: absolute; top: 16%; right: 11%; color: var(--blue-deep); font-size: 23px; opacity: .7; transform: scale(.82); transition: transform .24s ease, opacity .24s ease; pointer-events: none; }
 .preview-top small { max-width: 180px; text-align: right; line-height: 1.35; }
 .preview-item { grid-template-columns: 40px 1fr auto; }
 .preview-icon { width: 40px; height: 40px; }
@@ -98,6 +99,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-form button { flex: 0 0 auto; padding: 8px 12px; }
 .misu-note { margin: 0; padding: 0 18px 16px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) { .misu-title:hover img { transform: translateY(-3px) rotate(-3deg); } .misu-title:hover::after { opacity: 1; transform: translate(2px,-2px) scale(1.2) rotate(12deg); } }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) { .misu-home-art:hover img { transform: translateY(-5px) rotate(-2deg); } .misu-home-art:hover::after { opacity: 1; transform: translate(3px,-3px) scale(1.2) rotate(12deg); } }
 @media (max-width: 760px) {
   .landing { min-height: auto; padding-top: 32px; }
   .header-misu { width: 54px; height: 54px; margin: -6px 0 -11px; }
@@ -107,6 +109,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
   .misu-home-copy { margin: 0 auto; }
   .misu-home-art { order: -1; justify-self: center; }
   .misu-home-art img { width: min(100%,190px); margin: 0 auto; }
+  .misu-home-art::after { top: 13%; right: 16%; font-size: 18px; }
   .dashboard-toolbar { grid-template-columns: 1fr auto; align-items: start; }
   .tabs { grid-column: 1 / -1; width: 100%; }
   .period-selector { grid-column: 1; }
