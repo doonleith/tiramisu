@@ -303,6 +303,8 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
   }
 
   .period-selector button::before {
+    position: relative;
+    top: 2px;
     width: 8px;
     height: 8px;
     border-top: 2px solid currentColor;
