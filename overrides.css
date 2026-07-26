@@ -57,6 +57,35 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .transaction-main b { display: block; }
 .edit-button { padding: 7px 8px; color: var(--blue-deep); background: transparent; }
 .edit-button:hover { background: var(--blue); border-color: var(--blue); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.misu-open { position: fixed; right: 24px; bottom: 24px; z-index: 4; display: flex; align-items: center; gap: 9px; padding: 8px 14px 8px 8px; border-color: var(--blue); background: #fff; color: var(--ink); box-shadow: 0 10px 28px #20212822; }
+.misu-open img { width: 34px; height: 34px; object-fit: cover; object-position: center 58%; border-radius: 11px; background: #e7f1ff; }
+.misu-open:hover { background: var(--blue); border-color: var(--blue); transform: translateY(-1px); }
+.misu-dialog { width: min(460px, calc(100vw - 28px)); max-height: min(720px, calc(100vh - 28px)); padding: 0; border: 1px solid var(--line); border-radius: 20px; background: var(--paper); box-shadow: 0 24px 70px #20212830; }
+.misu-dialog::backdrop { background: #2021284d; }
+.misu-dialog > section { display: grid; grid-template-rows: auto minmax(180px,1fr) auto auto auto; max-height: inherit; }
+.misu-dialog header { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid var(--line); }
+.misu-title { display: flex; align-items: center; gap: 10px; }
+.misu-title img { width: 42px; height: 42px; object-fit: cover; object-position: center 58%; border-radius: 13px; background: #e7f1ff; }
+.misu-title small { display: block; color: var(--muted); font-size: 11px; }
+.misu-title h2 { margin: 1px 0 0; font-size: 21px; }
+#misu-close { padding: 5px 9px; background: transparent; font-size: 23px; line-height: 1; }
+.misu-messages { min-height: 220px; max-height: 420px; overflow-y: auto; padding: 16px 18px; }
+.misu-message { width: fit-content; max-width: 88%; margin: 0 0 10px; padding: 10px 12px; border-radius: 13px; color: var(--ink); font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
+.misu-message.assistant { background: #fff; border: 1px solid var(--line); border-top-left-radius: 4px; }
+.misu-message.user { margin-left: auto; background: var(--blue); border-top-right-radius: 4px; }
+.misu-message.pending { color: var(--muted); font-style: italic; }
+#misu-draft { margin: 0 18px 12px; }
+.misu-draft { padding: 13px; border: 1px solid var(--blue); border-radius: 13px; background: #edf7ff; }
+.misu-draft b { display: block; margin-bottom: 4px; }
+.misu-draft p { margin: 0 0 11px; color: #315b75; font-size: 13px; line-height: 1.45; }
+.misu-draft-actions { display: flex; gap: 8px; }
+.misu-draft-actions button { padding: 7px 10px; }
+.misu-draft-actions button:first-child { background: var(--ink); color: #fff; }
+.misu-form { display: flex; gap: 8px; padding: 0 18px 10px; }
+.misu-form input { flex: 1; min-width: 0; margin: 0; }
+.misu-form button { flex: 0 0 auto; padding: 8px 12px; }
+.misu-note { margin: 0; padding: 0 18px 16px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 @media (max-width: 760px) {
   .landing { padding-top: 32px; }
   .dashboard-toolbar { grid-template-columns: 1fr auto; align-items: start; }
@@ -67,4 +96,5 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
   .google-sign-in img { width: 198px; height: 44px; }
   .preview-top small { max-width: 130px; }
   .transaction { grid-template-columns: 40px 1fr auto auto; }
+  .misu-open { right: 16px; bottom: 16px; }
 }
