@@ -102,22 +102,341 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 @media (hover: hover) and (prefers-reduced-motion: no-preference) { .misu-title:hover img { transform: translateY(-3px) rotate(-3deg); } .misu-title:hover::after { opacity: 1; transform: translate(2px,-2px) scale(1.2) rotate(12deg); } }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) { .misu-home-art:hover img { transform: translateY(-5px) rotate(-2deg); } .misu-home-art:hover::after { opacity: 1; transform: translate(3px,-3px) scale(1.2) rotate(12deg); } }
 @media (max-width: 760px) {
-  .landing { min-height: auto; padding-top: 32px; }
-  .header-misu { width: 54px; height: 54px; margin: -6px 0 -11px; }
-  .header-misu img { width: 52px; height: 52px; }
-  .header-misu::after { top: 4px; right: 0; font-size: 12px; }
-  .misu-home { grid-template-columns: 1fr; gap: 18px; margin: 4px 0 42px; padding: 27px 23px 30px; text-align: center; }
-  .misu-home-copy { margin: 0 auto; }
-  .misu-home-art { order: -1; justify-self: center; }
-  .misu-home-art img { width: min(100%,190px); margin: 0 auto; }
-  .misu-home-art::after { top: 13%; right: 16%; font-size: 18px; }
-  .dashboard-toolbar { grid-template-columns: 1fr auto; align-items: start; }
-  .tabs { grid-column: 1 / -1; width: 100%; }
-  .period-selector { grid-column: 1; }
-  .new-tab { grid-column: 2; }
-  .google-sign-in { width: 198px; height: 44px; }
-  .google-sign-in img { width: 198px; height: 44px; }
-  .preview-top small { max-width: 130px; }
-  .transaction { grid-template-columns: 40px 1fr auto auto; }
-  .misu-open { right: 16px; bottom: 16px; }
+  body {
+    overflow-x: hidden;
+  }
+
+  main {
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+
+  header {
+    min-height: 58px;
+    gap: 12px;
+    padding-bottom: 17px;
+  }
+
+  .brand {
+    font-size: 27px;
+  }
+
+  .header-misu {
+    width: 46px;
+    height: 46px;
+    margin: -2px 0 -5px;
+  }
+
+  .header-misu img {
+    width: 44px;
+    height: 44px;
+  }
+
+  .header-misu::after {
+    top: 2px;
+    right: -1px;
+    font-size: 11px;
+  }
+
+  #user {
+    margin-left: auto;
+  }
+
+  #sign-out {
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+
+  .landing {
+    min-height: auto;
+    padding: 28px 6px 26px;
+  }
+
+  .landing h1 {
+    margin: 10px 0 22px;
+    font-size: clamp(46px, 14vw, 56px);
+    line-height: .94;
+  }
+
+  .landing-copy > p {
+    max-width: 34ch;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .landing-copy > p:not(.privacy-note) {
+    margin-bottom: 14px;
+  }
+
+  .google-sign-in,
+  .google-sign-in img {
+    width: 240px;
+    height: auto;
+  }
+
+  .google-sign-in {
+    min-height: 53px;
+  }
+
+  .setup-note,
+  .privacy-note {
+    font-size: 14px !important;
+    line-height: 1.45;
+  }
+
+  .setup-note {
+    margin-top: 9px !important;
+  }
+
+  .privacy-note {
+    margin-top: 5px !important;
+  }
+
+  .landing-preview {
+    margin-top: 32px;
+    padding: 20px;
+    box-shadow: 7px 9px 0 #e5f2fb;
+    transform: none;
+  }
+
+  .preview-top b {
+    font-size: 30px;
+  }
+
+  .preview-top small {
+    max-width: 132px;
+    font-size: 10px;
+  }
+
+  .preview-bar {
+    margin: 18px 0 12px;
+  }
+
+  .preview-item {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .preview-icon {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .preview-line {
+    margin: 14px 0;
+  }
+
+  .misu-home {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin: 12px 0 34px;
+    padding: 22px 20px 24px;
+    text-align: center;
+  }
+
+  .misu-home-copy {
+    margin: 0 auto;
+  }
+
+  .misu-home h2 {
+    margin: 5px 0 10px;
+    font-size: 38px;
+  }
+
+  .misu-home p {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .misu-home-art {
+    order: -1;
+    justify-self: center;
+  }
+
+  .misu-home-art img {
+    width: min(100%, 230px);
+    margin: -42px auto -48px;
+  }
+
+  .misu-home-art::after {
+    top: 18%;
+    right: 14%;
+    font-size: 17px;
+  }
+
+  #app-view {
+    padding-top: 18px;
+    padding-bottom: 76px;
+  }
+
+  .dashboard-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .tabs {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .tab {
+    min-height: 44px;
+  }
+
+  .period-selector {
+    grid-column: 1;
+    min-height: 44px;
+  }
+
+  .period-selector button {
+    width: 38px;
+    height: 38px;
+  }
+
+  #period-label {
+    min-width: 104px;
+    font-size: 14px;
+  }
+
+  .new-tab {
+    grid-column: 2;
+    min-height: 44px;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .cards article {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    min-height: 0;
+    padding: 16px;
+    gap: 7px 14px;
+  }
+
+  .cards p {
+    grid-column: 1;
+    margin: 0;
+  }
+
+  .cards strong {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    font-size: 29px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .cards small {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .tile-add {
+    grid-column: 2;
+    grid-row: 2;
+    min-height: 40px;
+    margin: 0;
+  }
+
+  .cards .left small,
+  .left-status {
+    grid-column: 1 / -1;
+  }
+
+  .left-status {
+    margin-top: 0;
+  }
+
+  .panels {
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .panels article {
+    min-height: auto;
+    padding: 18px;
+  }
+
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px 12px;
+    margin: 16px 0;
+  }
+
+  .breakdown-label {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  .breakdown-label > span:last-child {
+    overflow-wrap: anywhere;
+  }
+
+  .row > span:last-child {
+    grid-column: 2;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row .bar {
+    grid-column: 1 / -1;
+    margin-left: 48px;
+  }
+
+  .transaction {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .transaction-main {
+    display: block !important;
+    min-height: 44px;
+  }
+
+  .transaction-main b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .transaction-main small {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .transaction em {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .edit-button {
+    display: none !important;
+  }
+
+  .misu-open {
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    padding-right: 10px;
+    font-size: 12px;
+  }
+
+  .misu-open img {
+    width: 42px;
+    height: 42px;
+  }
 }
