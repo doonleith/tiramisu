@@ -23,6 +23,11 @@ function cors(req: Request) {
 function response(req: Request, body: unknown, status = 200) { return new Response(JSON.stringify(body), { status, headers: cors(req) }); }
 function monthRange(month: string) { const [year, number] = month.split("-").map(Number); return { start: `${month}-01`, end: new Date(Date.UTC(year, number, 1)).toISOString().slice(0, 10) }; }
 function safeMonth(month: unknown) { return typeof month === "string" && monthPattern.test(month) ? month : null; }
+function publishableKey() {
+  const direct = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
+  if (direct) return direct;
+  try { return Object.values(JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") || "{}"))[0] as string; } catch { return ""; }
+}
 function safeDraft(value: Record<string, unknown>): Draft | null {
   const type = value.type === "income" || value.type === "expense" ? value.type : null;
   const amount = typeof value.amount === "number" && Number.isFinite(value.amount) && value.amount >= .01 && value.amount <= 1_000_000 ? Math.round(value.amount * 100) / 100 : null;
@@ -43,7 +48,8 @@ Deno.serve(async (req) => {
     const authorization = req.headers.get("authorization");
     if (!authorization) return response(req, { error: "Please sign in before using Misu." }, 401);
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
+    const supabaseKey = publishableKey();
+    if (!supabaseKey) return response(req, { error: "The Supabase publishable key is unavailable to Misu." }, 500);
     const supabase = createClient(supabaseUrl, supabaseKey, { global: { headers: { Authorization: authorization } } });
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) return response(req, { error: "Please sign in before using Misu." }, 401);
