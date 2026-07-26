@@ -19,7 +19,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .google-sign-in img { display: block; width: 216px; height: 48px; }
 .google-sign-in:hover { transform: translateY(-1px); filter: drop-shadow(0 4px 8px #20212818); }
 .google-sign-in:focus-visible { outline: 3px solid var(--blue-deep); outline-offset: 3px; }
-.landing { align-items: start; padding-top: 36px; }
+.landing { min-height: calc(100vh - 200px); align-items: start; padding-top: 36px; padding-bottom: 22px; }
 .landing-copy > p:not(.privacy-note) { margin-bottom: 16px; }
 .setup-note { color: #5d5b64 !important; font-size: 13px !important; margin: 12px 0 0 !important; }
 .privacy-note { color: #56545d !important; margin-top: 8px !important; }
@@ -93,7 +93,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-form button { flex: 0 0 auto; padding: 8px 12px; }
 .misu-note { margin: 0; padding: 0 18px 16px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 @media (max-width: 760px) {
-  .landing { padding-top: 32px; }
+  .landing { min-height: auto; padding-top: 32px; }
   .misu-home { grid-template-columns: 1fr; gap: 18px; margin: 4px 0 42px; padding: 27px 23px 30px; text-align: center; }
   .misu-home-copy { margin: 0 auto; }
   .misu-home-art { order: -1; justify-self: center; }
