@@ -23,6 +23,15 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .landing-copy > p:not(.privacy-note) { margin-bottom: 16px; }
 .setup-note { color: #5d5b64 !important; font-size: 13px !important; margin: 12px 0 0 !important; }
 .privacy-note { color: #56545d !important; margin-top: 8px !important; }
+.misu-home { display: grid; grid-template-columns: minmax(0,1fr) 320px; gap: 48px; align-items: center; margin: 14px 8% 70px; padding: 38px 44px; border: 1px solid #d9eaf6; border-radius: 20px; background: #eef7fd; overflow: hidden; }
+.misu-home-copy { max-width: 500px; }
+.misu-home h2 { margin: 8px 0 13px; font: 600 clamp(36px,4vw,50px)/.98 Fraunces,serif; letter-spacing: -.055em; }
+.misu-home p { max-width: 470px; margin: 0 0 21px; color: #5d6670; font-size: 16px; line-height: 1.55; }
+.misu-home button { padding: 12px 15px; border-color: var(--ink); background: var(--ink); color: #fff; }
+.misu-home button:hover { border-color: var(--blue-deep); background: var(--blue-deep); }
+.misu-home button span { margin-left: 12px; font-size: 17px; }
+.misu-home-art { justify-self: end; width: 100%; }
+.misu-home-art img { display: block; width: min(100%,300px); height: auto; margin-left: auto; border-radius: 15px; }
 .preview-top small { max-width: 180px; text-align: right; line-height: 1.35; }
 .preview-item { grid-template-columns: 40px 1fr auto; }
 .preview-icon { width: 40px; height: 40px; }
@@ -88,6 +97,10 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-note { margin: 0; padding: 0 18px 16px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 @media (max-width: 760px) {
   .landing { padding-top: 32px; }
+  .misu-home { grid-template-columns: 1fr; gap: 18px; margin: 4px 0 42px; padding: 27px 23px 30px; text-align: center; }
+  .misu-home-copy { margin: 0 auto; }
+  .misu-home-art { order: -1; justify-self: center; }
+  .misu-home-art img { width: min(100%,190px); margin: 0 auto; }
   .dashboard-toolbar { grid-template-columns: 1fr auto; align-items: start; }
   .tabs { grid-column: 1 / -1; width: 100%; }
   .period-selector { grid-column: 1; }
