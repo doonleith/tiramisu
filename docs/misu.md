@@ -32,7 +32,8 @@ The default model is `openai/gpt-oss-20b`. You can optionally set a `MISU_MODEL`
 - Date-range totals and recurring annual projections are calculated by the Edge Function rather than by the language model.
 - Savings-goal affordability is an indication based on recorded cash flow, and responses state how many months of data were available.
 - Only the web app’s **Confirm & add** button writes to `transactions` or `recurring_transactions`.
-- Misu does not provide investment, tax, credit, or other regulated financial advice.
+- Misu is limited to factual insights, arithmetic, projections, and neutral scenario comparisons.
+- Misu does not provide financial, investment, tax, credit, pension, debt, insurance, or affordability advice. A server-side response guard blocks common recommendation-style language even if the model produces it.
 
 ## Operational notes
 
