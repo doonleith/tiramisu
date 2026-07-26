@@ -26,10 +26,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-home { display: grid; grid-template-columns: minmax(0,1fr) 320px; gap: 48px; align-items: center; margin: 14px 8% 70px; padding: 38px 44px; border: 1px solid #d9eaf6; border-radius: 20px; background: #eef7fd; overflow: hidden; }
 .misu-home-copy { max-width: 500px; }
 .misu-home h2 { margin: 8px 0 13px; font: 600 clamp(36px,4vw,50px)/.98 Fraunces,serif; letter-spacing: -.055em; }
-.misu-home p { max-width: 470px; margin: 0 0 21px; color: #5d6670; font-size: 16px; line-height: 1.55; }
-.misu-home button { padding: 12px 15px; border-color: var(--ink); background: var(--ink); color: #fff; }
-.misu-home button:hover { border-color: var(--blue-deep); background: var(--blue-deep); }
-.misu-home button span { margin-left: 12px; font-size: 17px; }
+.misu-home p { max-width: 470px; margin: 0; color: #5d6670; font-size: 16px; line-height: 1.55; }
 .misu-home-art { justify-self: end; width: 100%; }
 .misu-home-art img { display: block; width: min(100%,300px); height: auto; margin-left: auto; border-radius: 15px; }
 .preview-top small { max-width: 180px; text-align: right; line-height: 1.35; }
