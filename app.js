@@ -153,6 +153,7 @@ async function saveMisuUpdateDraft() {
 
 function render(){
   const current=monthTransactions(),incomeEntries=current.filter(item=>item.type==='income'),expenses=current.filter(item=>item.type==='expense'),income=incomeEntries.reduce((sum,item)=>sum+item.amount,0),spent=expenses.reduce((sum,item)=>sum+item.amount,0),balance=income-spent;
+  $('spent-title').textContent=monthKey()<new Date().toISOString().slice(0,7)?'Spent':'Spending';
   $('income').textContent=money(income);$('spent').textContent=money(spent);$('balance').textContent=money(balance);$('income-detail').textContent=incomeEntries.length?`${incomeEntries.length} income ${incomeEntries.length===1?'entry':'entries'} this period`:'No income recorded yet';
   const grouped=expenses.reduce((all,item)=>{all[item.category]=(all[item.category]||0)+item.amount;return all},{}),entries=Object.entries(grouped).sort((a,b)=>b[1]-a[1]),largest=entries[0]?.[0];
   $('spent-detail').textContent=expenses.length?`${expenses.length} expense ${expenses.length===1?'entry':'entries'}`:'No expenses recorded yet';
