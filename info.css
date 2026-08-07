@@ -1,0 +1,24 @@
+:root { --info-ink: #20212a; --info-muted: #615f68; --info-paper: #fbfaf7; --info-line: #e5e2dc; --info-blue: #a9d8f6; }
+body { background: var(--info-paper); color: var(--info-ink); }
+.info-main { width: min(900px, calc(100% - 40px)); margin: 0 auto; padding: 28px 0 64px; }
+.info-header { display: flex; align-items: baseline; gap: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--info-line); }
+.info-brand { color: var(--info-ink); font-size: 34px; font-weight: 800; letter-spacing: -.08em; text-decoration: none; }
+.info-brand span { color: #5ba7d7; }
+.info-header p { margin: 0; color: var(--info-muted); }
+.info-content { max-width: 680px; padding: 58px 0 40px; }
+.info-eyebrow { margin: 0 0 10px; color: #5c8dad; font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.info-content h1 { margin: 0 0 18px; font: 600 clamp(42px, 6vw, 64px)/.98 Fraunces, Georgia, serif; letter-spacing: -.06em; }
+.info-content h2 { margin: 40px 0 10px; font: 600 27px/1.1 Fraunces, Georgia, serif; letter-spacing: -.04em; }
+.info-content p, .info-content li { color: var(--info-muted); font-size: 16px; line-height: 1.65; }
+.info-content ul { padding-left: 22px; }
+.info-content a { color: var(--info-ink); text-decoration-color: #8cc8eb; text-underline-offset: 3px; }
+.info-note { margin: 28px 0; padding: 16px 18px; border: 1px solid #d8ebf8; border-radius: 12px; background: #eef7fd; }
+.info-note p { margin: 0; color: #426071; font-size: 14px; }
+.info-footer { display: flex; justify-content: space-between; gap: 16px; padding-top: 22px; border-top: 1px solid var(--info-line); color: var(--info-muted); font-size: 13px; }
+.info-footer a { color: inherit; }
+.public-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 0 8% 30px; padding: 24px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+.public-footer nav { display: flex; flex-wrap: wrap; gap: 18px; }
+.public-footer a { color: inherit; text-decoration: none; }
+.public-footer a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+body:has(#app-view:not([hidden])) #public-footer { display: none; }
+@media (max-width: 620px) { .info-main { width: min(100% - 32px, 900px); padding-top: 20px; } .info-header { align-items: flex-start; flex-direction: column; gap: 4px; padding-bottom: 18px; } .info-content { padding-top: 42px; } .info-footer, .public-footer { align-items: flex-start; flex-direction: column; } .public-footer { margin: 0 20px 24px; } }
