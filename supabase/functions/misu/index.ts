@@ -83,8 +83,40 @@ async function requestCompletion(apiKey: string, messages: Array<Record<string, 
 }
 
 const advicePattern = /\b(?:you should|you must|you ought to|you need to|i recommend|my recommendation|i advise|you can afford|you could afford|you cannot afford|you can't afford|a good investment|a bad investment|safe investment|best investment|you (?:should|could|ought to|need to) (?:buy|sell|borrow|invest|take out|apply for))\b/i;
+
+function removeMarkdownTables(reply: string) {
+  return reply
+    .split("\n")
+    .flatMap((line) => {
+      if (!line.includes("|")) {
+        return [line];
+      }
+
+      const cells = line
+        .split("|")
+        .map((cell) => cell.trim())
+        .filter(Boolean);
+
+      const isSeparator = cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+      const isHeader = cells.some((cell) => /^(category|monthly amount|annual projection)$/i.test(cell));
+
+      if (isSeparator || isHeader) {
+        return [];
+      }
+
+      if (cells.length === 3) {
+        return [`${cells[0]}: ${cells[1]} per month, ${cells[2]} per year.`];
+      }
+
+      return [cells.join(" — ")];
+    })
+    .join("\n");
+}
+
 function insightOnly(reply: string) {
-  const plainReply = reply.replace(/\*\*/g, "").replace(/(^|\n)\s*[*-]\s+/g, "$1");
+  const plainReply = removeMarkdownTables(reply)
+    .replace(/\*\*/g, "")
+    .replace(/(^|\n)\s*[*-]\s+/g, "$1");
   if (!advicePattern.test(plainReply)) return plainReply;
   return "I can’t make financial decisions or recommendations for you. I can show your recorded figures, calculate the maths, or compare neutral scenarios instead.";
 }
