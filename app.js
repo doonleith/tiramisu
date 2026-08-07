@@ -170,8 +170,11 @@ function render(){
       const schedule = item.recurringTransactionId
         ? `${item.category} · Monthly · ${ordinal(Number(item.date.slice(-2)))}`
         : `${item.category} · ${new Date(`${item.date}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
-      const attribution = shared && item.createdByName
-        ? ` · Added by ${item.createdByName}`
+      const creatorName = item.createdByName === 'Space owner' && item.userId === user?.id
+        ? userDisplayName()
+        : item.createdByName;
+      const attribution = shared && creatorName
+        ? ` · Added by ${creatorName}`
         : '';
       const detail = escapeHtml(`${schedule}${attribution}`);
 
@@ -325,7 +328,7 @@ async function materializeRecurring() {
   }
 }
 
-async function load(){if(!user||!activeLedgerId)return;try{await materializeRecurring();const{data,error}=await client.from('transactions').select('*').eq('ledger_id',activeLedgerId).order('transaction_date',{ascending:false});if(error)throw error;transactions=data.map(item=>({id:item.id,type:item.type,amount:Number(item.amount),category:item.category,date:item.transaction_date,note:item.note||'',recurringTransactionId:item.recurring_transaction_id,createdByName:item.created_by_name||''}));render()}catch(error){alert(`Could not load your transactions: ${error.message}`)}}
+async function load(){if(!user||!activeLedgerId)return;try{await materializeRecurring();const{data,error}=await client.from('transactions').select('*').eq('ledger_id',activeLedgerId).order('transaction_date',{ascending:false});if(error)throw error;transactions=data.map(item=>({id:item.id,userId:item.user_id,type:item.type,amount:Number(item.amount),category:item.category,date:item.transaction_date,note:item.note||'',recurringTransactionId:item.recurring_transaction_id,createdByName:item.created_by_name||''}));render()}catch(error){alert(`Could not load your transactions: ${error.message}`)}}
 
 function openForm(transaction,selectedType){if(!user)return signIn();const editing=Boolean(transaction),type=transaction?.type||selectedType||'expense',date=transaction?.date||localDate();$('form').reset();$('id').value=transaction?.id||'';$('type').value=type;$('form-title').textContent=editing?'Edit transaction':`Add ${type}`;$('form-note').textContent=editing?(transaction?.recurringTransactionId?'Changes apply from this month forward':'Update entry'):`New ${type}`;fillCategories(type,transaction?.category);$('amount').value=transaction?.amount||'';$('date').value=date;$('note').value=transaction?.note||'';$('repeat-monthly').checked=editing?Boolean(transaction?.recurringTransactionId):true;fillMonthlyDays(Number(date.slice(-2)));syncDateFields();$('delete').style.visibility=editing?'visible':'hidden';if(!$('dialog').open)$('dialog').showModal();$('amount').focus()}
 
