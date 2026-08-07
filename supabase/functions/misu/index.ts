@@ -17,7 +17,7 @@ const tools = [
 ];
 
 type Draft = { type: "income" | "expense"; amount: number; category: string; date: string; note: string; repeat_monthly: boolean; payment_day?: number };
-type UpdateDraft = { updates: Array<{ id: string; type: "income" | "expense"; category: string; note: string; date: string; old_amount: number; new_amount: number }> };
+type UpdateDraft = { updates: Array<{ id: string; type: "income" | "expense"; category: string; note: string; date: string; old_amount: number; new_amount: number; recurring_transaction_id: string | null; created_by_name: string }> };
 const monthPattern = /^\d{4}-(0[1-9]|1[0-2])$/;
 const datePattern = /^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/;
 
@@ -93,14 +93,14 @@ Deno.serve(async (req) => {
         if (!updates.length || updates.length > 10 || updates.some((item) => !item.id || item.amount < .01 || item.amount > 1_000_000) || new Set(updates.map((item) => item.id)).size !== updates.length) {
           return { error: "Provide one to ten distinct transaction IDs returned by find_transactions, each with a valid replacement amount." };
         }
-        const { data, error } = await supabase.from("transactions").select("id,type,amount,category,note,transaction_date").eq("ledger_id", ledgerId).in("id", updates.map((item) => item.id));
+        const { data, error } = await supabase.from("transactions").select("id,type,amount,category,note,transaction_date,recurring_transaction_id,created_by_name").eq("ledger_id", ledgerId).in("id", updates.map((item) => item.id));
         if (error) return { error: "Could not retrieve the transactions to update." };
         if (!data || data.length !== updates.length) return { error: "One or more selected transactions are no longer available in this money space." };
         const byId = new Map(data.map((item) => [item.id, item]));
         updateDraft = {
           updates: updates.map((item) => {
             const original = byId.get(item.id)!;
-            return { id: original.id, type: original.type, category: original.category, note: original.note || "", date: original.transaction_date, old_amount: Number(original.amount), new_amount: item.amount };
+            return { id: original.id, type: original.type, category: original.category, note: original.note || "", date: original.transaction_date, old_amount: Number(original.amount), new_amount: item.amount, recurring_transaction_id: original.recurring_transaction_id, created_by_name: original.created_by_name || "" };
           }),
         };
         return { status: "update_draft_ready", update_draft: updateDraft };
