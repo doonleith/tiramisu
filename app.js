@@ -9,7 +9,7 @@ function setTheme(theme){const night=theme==='night';document.body.dataset.theme
 function initializeTheme(){setTheme(localStorage.getItem('tiramisu-theme')==='night'?'night':'day')}
 const categoryInfo=(category,type)=>categories[type].find(item=>item[0]===category)||(category==='Rent / mortgage'?['Rent / mortgage','#b9a4f8','rent-mortgage']:categories[type].at(-1));
 const escapeHtml=value=>{const node=document.createElement('div');node.textContent=value;return node.innerHTML};
-let month=new Date(),transactions=[],ledgers=[],activeLedgerId=null,client,user,misuMessages=[],misuDraft=null,misuUpdateDraft=null;month.setDate(1);
+let month=new Date(),transactions=[],recurringRules=[],ledgers=[],activeLedgerId=null,client,user,misuMessages=[],misuDraft=null,misuUpdateDraft=null;month.setDate(1);
 
 function monthKey(){return `${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}`}
 function periodName(){return month.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}
@@ -21,11 +21,19 @@ function tileBackground(colour,iconId){return ['disposable-income','subscription
 function renderCategoryIcon(category,type){const[,colour,iconId]=categoryInfo(category,type);$('category-icon').style.background=tileBackground(colour,iconId);$('category-icon').innerHTML=iconSvg(iconId)}
 function fillCategories(type,selected){const options=categories[type],choices=selected&&!options.some(([name])=>name===selected)?[...options,[selected,'#b9b6ae','other']]:options;$('category').innerHTML=choices.map(([name])=>`<option ${name===selected?'selected':''}>${name}</option>`).join('');renderCategoryIcon($('category').value,type)}
 function ordinal(day){const endings=['th','st','nd','rd'],remainder=day%100;return `${day}${endings[(remainder-20)%10]||endings[remainder]||endings[0]}`}
-function fillMonthlyDays(selectedDay){$('monthly-day').innerHTML=Array.from({length:31},(_,index)=>index+1).map(day=>`<option value="${day}" ${day===selectedDay?'selected':''}>${ordinal(day)} of the month</option>`).join('')}
-function syncDateFields(){const repeating=$('repeat-monthly').checked;$('date-field').hidden=repeating;$('monthly-day-field').hidden=!repeating;$('date').required=!repeating}
-function recurringStartDate(day){const today=new Date(),lastDay=new Date(today.getFullYear(),today.getMonth()+1,0).getDate();return localDate(new Date(today.getFullYear(),today.getMonth(),Math.min(day,lastDay),12))}
-function recurringDateInPeriod(day,periodDate){const date=new Date(`${periodDate}T12:00:00`),lastDay=new Date(date.getFullYear(),date.getMonth()+1,0).getDate();return localDate(new Date(date.getFullYear(),date.getMonth(),Math.min(day,lastDay),12))}
-function recurringDate(rule){const start=new Date(`${rule.start_date}T12:00:00`),year=month.getFullYear(),monthIndex=month.getMonth();if(new Date(year,monthIndex+1,0)<start)return null;const lastDay=new Date(year,monthIndex+1,0).getDate();return localDate(new Date(year,monthIndex,Math.min(start.getDate(),lastDay),12))}
+function frequencyLabel(frequency){return ({weekly:'Weekly',biweekly:'Every two weeks',monthly:'Monthly',bimonthly:'Every two months'})[frequency]||'Monthly'}
+function syncDateFields(){const repeating=$('repeat-transaction').checked;$('date-field').hidden=repeating;$('recurrence-field').hidden=!repeating;$('recurring-date-field').hidden=!repeating;$('date').required=!repeating;$('recurring-start-date').required=repeating}
+function recurringDates(rule){
+  const start=new Date(`${rule.start_date}T12:00:00`),year=month.getFullYear(),monthIndex=month.getMonth(),periodStart=new Date(year,monthIndex,1,12),periodEnd=new Date(year,monthIndex+1,0,12),frequency=rule.frequency||'monthly';
+  if(start>periodEnd)return[];
+  if(frequency==='monthly'||frequency==='bimonthly'){
+    const monthsApart=(year-start.getFullYear())*12+monthIndex-start.getMonth();
+    if(monthsApart<0||(frequency==='bimonthly'&&monthsApart%2))return[];
+    const lastDay=periodEnd.getDate();return[localDate(new Date(year,monthIndex,Math.min(start.getDate(),lastDay),12))];
+  }
+  const interval=frequency==='biweekly'?14:7,startUtc=Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()),periodStartUtc=Date.UTC(year,monthIndex,1),periodEndUtc=Date.UTC(year,monthIndex+1,0),firstOffset=Math.max(0,Math.ceil((periodStartUtc-startUtc)/86400000/interval));
+  const dates=[];for(let offset=firstOffset;;offset+=1){const timestamp=startUtc+offset*interval*86400000;if(timestamp>periodEndUtc)break;dates.push(new Date(timestamp).toISOString().slice(0,10))}return dates;
+}
 
 function renderTabs() {
   $('tabs').innerHTML = ledgers.map(ledger => `
@@ -120,7 +128,7 @@ async function saveMisuDraft() {
 }
 
 async function splitRecurringPayment(existing, next) {
-  const { data: rule, error: ruleCreateError } = await client.from('recurring_transactions').insert({ user_id: user.id, created_by_name: existing.createdByName || userDisplayName(), ledger_id: activeLedgerId, type: next.type, amount: next.amount, category: next.category, note: next.note || null, start_date: next.date }).select().single();
+  const { data: rule, error: ruleCreateError } = await client.from('recurring_transactions').insert({ user_id: user.id, created_by_name: existing.createdByName || userDisplayName(), ledger_id: activeLedgerId, type: next.type, amount: next.amount, category: next.category, note: next.note || null, start_date: next.date, frequency: next.frequency || 'monthly' }).select().single();
   if (ruleCreateError) throw ruleCreateError;
   const { error: stopError } = await client.from('recurring_transactions').update({ active: false }).eq('id', existing.recurringTransactionId);
   if (stopError) throw stopError;
@@ -171,8 +179,9 @@ function render(){
   $('transactions').innerHTML = recent.length
     ? recent.map(item => {
       const [, colour, iconId] = categoryInfo(item.category, item.type);
+      const rule = recurringRules.find(candidate => candidate.id === item.recurringTransactionId);
       const schedule = item.recurringTransactionId
-        ? `${item.category} · Monthly · ${ordinal(Number(item.date.slice(-2)))}`
+        ? `${item.category} · ${frequencyLabel(rule?.frequency)} · ${new Date(`${item.date}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
         : `${item.category} · ${new Date(`${item.date}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
       const creatorName = item.createdByName === 'Space owner' && item.userId === user?.id
         ? userDisplayName()
@@ -301,11 +310,9 @@ async function materializeRecurring() {
       `${item.recurring_transaction_id}:${item.transaction_date}`
     )),
   );
+  recurringRules = rules;
   const newOccurrences = rules
-    .map(rule => ({
-      rule,
-      date: recurringDate(rule),
-    }))
+    .flatMap(rule => recurringDates(rule).map(date => ({ rule, date })))
     .filter(({ rule, date }) => (
       date && !keys.has(`${rule.id}:${date}`)
     ))
@@ -334,7 +341,7 @@ async function materializeRecurring() {
 
 async function load(){if(!user||!activeLedgerId)return;try{await materializeRecurring();const{data,error}=await client.from('transactions').select('*').eq('ledger_id',activeLedgerId).order('transaction_date',{ascending:false});if(error)throw error;transactions=data.map(item=>({id:item.id,userId:item.user_id,type:item.type,amount:Number(item.amount),category:item.category,date:item.transaction_date,note:item.note||'',recurringTransactionId:item.recurring_transaction_id,createdByName:item.created_by_name||''}));render()}catch(error){alert(`Could not load your transactions: ${error.message}`)}}
 
-function openForm(transaction,selectedType){if(!user)return signIn();const editing=Boolean(transaction),type=transaction?.type||selectedType||'expense',date=transaction?.date||localDate();$('form').reset();$('id').value=transaction?.id||'';$('type').value=type;$('form-title').textContent=editing?'Edit transaction':`Add ${type}`;$('form-note').textContent=editing?(transaction?.recurringTransactionId?'Changes apply from this month forward':'Update entry'):`New ${type}`;fillCategories(type,transaction?.category);$('amount').value=transaction?.amount||'';$('date').value=date;$('note').value=transaction?.note||'';$('repeat-monthly').checked=editing?Boolean(transaction?.recurringTransactionId):true;fillMonthlyDays(Number(date.slice(-2)));syncDateFields();$('delete').style.visibility=editing?'visible':'hidden';if(!$('dialog').open)$('dialog').showModal();$('amount').focus()}
+function openForm(transaction,selectedType){if(!user)return signIn();const editing=Boolean(transaction),type=transaction?.type||selectedType||'expense',date=transaction?.date||localDate(),rule=recurringRules.find(candidate=>candidate.id===transaction?.recurringTransactionId);$('form').reset();$('id').value=transaction?.id||'';$('type').value=type;$('form-title').textContent=editing?'Edit transaction':`Add ${type}`;$('form-note').textContent=editing?(transaction?.recurringTransactionId?'Changes apply from this date forward':'Update entry'):`New ${type}`;fillCategories(type,transaction?.category);$('amount').value=transaction?.amount||'';$('date').value=date;$('recurring-start-date').value=date;$('note').value=transaction?.note||'';$('repeat-transaction').checked=editing?Boolean(transaction?.recurringTransactionId):true;$('recurrence-frequency').value=rule?.frequency||'monthly';syncDateFields();$('delete').style.visibility=editing?'visible':'hidden';if(!$('dialog').open)$('dialog').showModal();$('amount').focus()}
 
 async function switchLedger(id,keepFocus=false){if(id===activeLedgerId)return;activeLedgerId=id;misuDraft=null;misuUpdateDraft=null;misuMessages=[];localStorage.setItem('tiramisu-active-ledger',id);renderTabs();if(keepFocus)$('tabs').querySelector(`[data-ledger="${id}"]`)?.focus();await load()}
 async function changePeriod(offset){month=new Date(month.getFullYear(),month.getMonth()+offset,1);await load()}
@@ -565,12 +572,11 @@ $('form').onsubmit = async event => {
   ];
   const id = $('id').value;
   const type = $('type').value;
-  const repeat = $('repeat-monthly').checked;
+  const repeat = $('repeat-transaction').checked;
+  const frequency = $('recurrence-frequency').value;
   const saveAnother = event.submitter?.id === 'save-another';
   const existing = transactions.find(item => item.id === id);
-  const transactionDate = repeat
-    ? (existing ? recurringDateInPeriod(Number($('monthly-day').value), existing.date) : recurringStartDate(Number($('monthly-day').value)))
-    : $('date').value;
+  const transactionDate = repeat ? $('recurring-start-date').value : $('date').value;
   let recurringId = existing?.recurringTransactionId || null;
   const details = {
     ledger_id: activeLedgerId,
@@ -589,7 +595,7 @@ $('form').onsubmit = async event => {
   try {
     const splittingRecurring = Boolean(repeat && existing?.recurringTransactionId);
     if (splittingRecurring) {
-      await splitRecurringPayment(existing, { type, amount, category: details.category, note: details.note, date: transactionDate });
+      await splitRecurringPayment(existing, { type, amount, category: details.category, note: details.note, date: transactionDate, frequency });
     } else if (repeat) {
       const { data, error } = await client
         .from('recurring_transactions')
@@ -597,6 +603,7 @@ $('form').onsubmit = async event => {
           ...details,
           user_id: user.id,
           created_by_name: userDisplayName(),
+          frequency,
         })
         .select()
         .single();
