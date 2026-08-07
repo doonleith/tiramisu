@@ -11,6 +11,7 @@ Tiramisu is a lightweight, manual personal-finance tracker. It is a static web a
 - View income, spending, remaining money, category totals, and activity for a selected month.
 - Create monthly recurring entries by selecting a payment day, such as the 1st of the month.
 - Keep recurring entries private to the selected money space.
+- Share a money space through a one-time invite link.
 - Sign in with Google through Supabase Auth.
 
 ## Live app
@@ -43,6 +44,7 @@ supabase/schema.sql            Initial transactions table and RLS policies
 supabase/recurring-payments.sql
                                Monthly recurring-payment migration
 supabase/named-tabs.sql        Named money-space migration and ledger-aware RLS
+supabase/shared-spaces.sql     Membership, invite links, and shared-space RLS
 supabase/config.example.js     Safe configuration template
 ```
 
@@ -59,8 +61,10 @@ In Supabase **SQL Editor**, run each file once, in this order:
 1. `supabase/schema.sql`
 2. `supabase/recurring-payments.sql`
 3. `supabase/named-tabs.sql`
+4. `supabase/shared-spaces.sql`
 
-The final migration creates named money spaces and moves any existing data into a `Personal` space.
+The migrations preserve existing data, create named money spaces, and then add
+shared-space membership and one-time invite links.
 
 ### 3. Configure the browser client
 
@@ -106,13 +110,15 @@ GitHub Pages deploys changes from the repository’s default branch. Check deplo
 ## Security notes
 
 - All data tables use RLS policies tied to `auth.uid()`.
-- Transactions and recurring rules are checked against a money space owned by the signed-in user.
+- Transactions and recurring rules are available only to a space owner or member.
+- Only a space owner can create invite links or remove members.
+- Invite links expire after seven days and can be accepted once.
 - The app does not collect bank credentials or connect to bank accounts; all entries are manual.
 - Avoid committing OAuth client secrets, Supabase service-role keys, or user-exported financial data.
 
 ## Current product boundaries
 
 - The app is designed for manual personal finance tracking.
-- A money space is private to its owner; shared spaces are not implemented yet.
+- Shared spaces use one-time links; Tiramisu does not send invitation emails.
 - Recurring payments are generated for the month the user is viewing and remain individually editable.
 - Categories are currently fixed in `app.js`. Custom categories and budget limits are future work.
