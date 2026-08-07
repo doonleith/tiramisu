@@ -22,6 +22,7 @@ function ordinal(day){const endings=['th','st','nd','rd'],remainder=day%100;retu
 function fillMonthlyDays(selectedDay){$('monthly-day').innerHTML=Array.from({length:31},(_,index)=>index+1).map(day=>`<option value="${day}" ${day===selectedDay?'selected':''}>${ordinal(day)} of the month</option>`).join('')}
 function syncDateFields(){const repeating=$('repeat-monthly').checked;$('date-field').hidden=repeating;$('monthly-day-field').hidden=!repeating;$('date').required=!repeating}
 function recurringStartDate(day){const today=new Date(),lastDay=new Date(today.getFullYear(),today.getMonth()+1,0).getDate();return localDate(new Date(today.getFullYear(),today.getMonth(),Math.min(day,lastDay),12))}
+function recurringDateInPeriod(day,periodDate){const date=new Date(`${periodDate}T12:00:00`),lastDay=new Date(date.getFullYear(),date.getMonth()+1,0).getDate();return localDate(new Date(date.getFullYear(),date.getMonth(),Math.min(day,lastDay),12))}
 function recurringDate(rule){const start=new Date(`${rule.start_date}T12:00:00`),year=month.getFullYear(),monthIndex=month.getMonth();if(new Date(year,monthIndex+1,0)<start)return null;const lastDay=new Date(year,monthIndex+1,0).getDate();return localDate(new Date(year,monthIndex,Math.min(start.getDate(),lastDay),12))}
 
 function renderTabs() {
@@ -116,6 +117,17 @@ async function saveMisuDraft() {
   }
 }
 
+async function splitRecurringPayment(existing, next) {
+  const { data: rule, error: ruleCreateError } = await client.from('recurring_transactions').insert({ user_id: user.id, created_by_name: existing.createdByName || userDisplayName(), ledger_id: activeLedgerId, type: next.type, amount: next.amount, category: next.category, note: next.note || null, start_date: next.date }).select().single();
+  if (ruleCreateError) throw ruleCreateError;
+  const { error: stopError } = await client.from('recurring_transactions').update({ active: false }).eq('id', existing.recurringTransactionId);
+  if (stopError) throw stopError;
+  const { error: futureDeleteError } = await client.from('transactions').delete().eq('ledger_id', activeLedgerId).eq('recurring_transaction_id', existing.recurringTransactionId).gte('transaction_date', existing.date);
+  if (futureDeleteError) throw futureDeleteError;
+  const { error: occurrenceError } = await client.from('transactions').insert({ user_id: user.id, created_by_name: existing.createdByName || userDisplayName(), ledger_id: activeLedgerId, type: next.type, amount: next.amount, category: next.category, note: next.note || null, transaction_date: next.date, recurring_transaction_id: rule.id });
+  if (occurrenceError) throw occurrenceError;
+}
+
 async function saveMisuUpdateDraft() {
   const updateDraft = misuUpdateDraft;
   if (!updateDraft?.updates?.length || !activeLedgerId) return;
@@ -123,8 +135,12 @@ async function saveMisuUpdateDraft() {
   if (invalid) { alert('One of these changes has an invalid amount.'); return; }
   try {
     for (const item of updateDraft.updates) {
-      const { error } = await client.from('transactions').update({ amount: Number(item.new_amount) }).eq('id', item.id).eq('ledger_id', activeLedgerId);
-      if (error) throw error;
+      if (item.recurring_transaction_id) {
+        await splitRecurringPayment({ id: item.id, recurringTransactionId: item.recurring_transaction_id, date: item.date, createdByName: item.created_by_name || '' }, { type: item.type, amount: Number(item.new_amount), category: item.category, note: item.note, date: item.date });
+      } else {
+        const { error } = await client.from('transactions').update({ amount: Number(item.new_amount) }).eq('id', item.id).eq('ledger_id', activeLedgerId);
+        if (error) throw error;
+      }
     }
     misuMessages.push({ role: 'assistant', content: `${updateDraft.updates.length===1?'That transaction has':'Those transactions have'} been updated.` });
     misuUpdateDraft = null;
@@ -307,7 +323,7 @@ async function materializeRecurring() {
 
 async function load(){if(!user||!activeLedgerId)return;try{await materializeRecurring();const{data,error}=await client.from('transactions').select('*').eq('ledger_id',activeLedgerId).order('transaction_date',{ascending:false});if(error)throw error;transactions=data.map(item=>({id:item.id,type:item.type,amount:Number(item.amount),category:item.category,date:item.transaction_date,note:item.note||'',recurringTransactionId:item.recurring_transaction_id,createdByName:item.created_by_name||''}));render()}catch(error){alert(`Could not load your transactions: ${error.message}`)}}
 
-function openForm(transaction,selectedType){if(!user)return signIn();const editing=Boolean(transaction),type=transaction?.type||selectedType||'expense',date=transaction?.date||localDate();$('form').reset();$('id').value=transaction?.id||'';$('type').value=type;$('form-title').textContent=editing?'Edit transaction':`Add ${type}`;$('form-note').textContent=editing?'Update entry':`New ${type}`;fillCategories(type,transaction?.category);$('amount').value=transaction?.amount||'';$('date').value=date;$('note').value=transaction?.note||'';$('repeat-monthly').checked=editing?Boolean(transaction?.recurringTransactionId):true;fillMonthlyDays(Number(date.slice(-2)));syncDateFields();$('delete').style.visibility=editing?'visible':'hidden';if(!$('dialog').open)$('dialog').showModal();$('amount').focus()}
+function openForm(transaction,selectedType){if(!user)return signIn();const editing=Boolean(transaction),type=transaction?.type||selectedType||'expense',date=transaction?.date||localDate();$('form').reset();$('id').value=transaction?.id||'';$('type').value=type;$('form-title').textContent=editing?'Edit transaction':`Add ${type}`;$('form-note').textContent=editing?(transaction?.recurringTransactionId?'Changes apply from this month forward':'Update entry'):`New ${type}`;fillCategories(type,transaction?.category);$('amount').value=transaction?.amount||'';$('date').value=date;$('note').value=transaction?.note||'';$('repeat-monthly').checked=editing?Boolean(transaction?.recurringTransactionId):true;fillMonthlyDays(Number(date.slice(-2)));syncDateFields();$('delete').style.visibility=editing?'visible':'hidden';if(!$('dialog').open)$('dialog').showModal();$('amount').focus()}
 
 async function switchLedger(id,keepFocus=false){if(id===activeLedgerId)return;activeLedgerId=id;misuDraft=null;misuUpdateDraft=null;misuMessages=[];localStorage.setItem('tiramisu-active-ledger',id);renderTabs();if(keepFocus)$('tabs').querySelector(`[data-ledger="${id}"]`)?.focus();await load()}
 async function changePeriod(offset){month=new Date(month.getFullYear(),month.getMonth()+offset,1);await load()}
@@ -540,10 +556,10 @@ $('form').onsubmit = async event => {
   const type = $('type').value;
   const repeat = $('repeat-monthly').checked;
   const saveAnother = event.submitter?.id === 'save-another';
-  const transactionDate = repeat
-    ? recurringStartDate(Number($('monthly-day').value))
-    : $('date').value;
   const existing = transactions.find(item => item.id === id);
+  const transactionDate = repeat
+    ? (existing ? recurringDateInPeriod(Number($('monthly-day').value), existing.date) : recurringStartDate(Number($('monthly-day').value)))
+    : $('date').value;
   let recurringId = existing?.recurringTransactionId || null;
   const details = {
     ledger_id: activeLedgerId,
@@ -560,15 +576,9 @@ $('form').onsubmit = async event => {
   });
 
   try {
-    if (repeat && recurringId) {
-      const { error } = await client
-        .from('recurring_transactions')
-        .update(details)
-        .eq('id', recurringId);
-
-      if (error) {
-        throw error;
-      }
+    const splittingRecurring = Boolean(repeat && existing?.recurringTransactionId);
+    if (splittingRecurring) {
+      await splitRecurringPayment(existing, { type, amount, category: details.category, note: details.note, date: transactionDate });
     } else if (repeat) {
       const { data, error } = await client
         .from('recurring_transactions')
@@ -595,6 +605,9 @@ $('form').onsubmit = async event => {
         throw error;
       }
 
+      const { error: futureDeleteError } = await client.from('transactions').delete().eq('ledger_id', activeLedgerId).eq('recurring_transaction_id', recurringId).gte('transaction_date', existing.date).neq('id', id);
+      if (futureDeleteError) throw futureDeleteError;
+
       recurringId = null;
     }
 
@@ -607,8 +620,10 @@ $('form').onsubmit = async event => {
       note: details.note,
       recurring_transaction_id: recurringId,
     };
-    const result = id
-      ? await client.from('transactions').update(item).eq('id', id)
+    const result = splittingRecurring
+      ? { error: null }
+      : id
+        ? await client.from('transactions').update(item).eq('id', id)
       : await client.from('transactions').insert({
         ...item,
         user_id: user.id,
