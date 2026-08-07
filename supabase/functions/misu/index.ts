@@ -31,6 +31,57 @@ function safeDate(date: unknown) { return typeof date === "string" && datePatter
 function addDay(date: string) { const value = new Date(`${date}T00:00:00Z`); value.setUTCDate(value.getUTCDate() + 1); return value.toISOString().slice(0, 10); }
 function subtractDay(date: string) { const value = new Date(`${date}T00:00:00Z`); value.setUTCDate(value.getUTCDate() - 1); return value.toISOString().slice(0, 10); }
 function rounded(value: number) { return Math.round(value * 100) / 100; }
+
+function wait(milliseconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+function retryDelay(response: Response, attempt: number) {
+  const retryAfter = Number(response.headers.get("retry-after"));
+  const providerDelay = Number.isFinite(retryAfter) ? retryAfter * 1000 : 0;
+  const fallbackDelay = (attempt + 1) * 10_000;
+
+  return Math.min(Math.max(providerDelay, fallbackDelay), 20_000);
+}
+
+async function requestCompletion(apiKey: string, messages: Array<Record<string, unknown>>) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const modelResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: Deno.env.get("MISU_MODEL") || "openai/gpt-oss-20b",
+        temperature: 0.2,
+        messages,
+        tools,
+        tool_choice: "auto",
+      }),
+    });
+
+    if (modelResponse.ok) {
+      return modelResponse;
+    }
+
+    const shouldRetry = modelResponse.status === 429 && attempt < 2;
+
+    if (shouldRetry) {
+      await wait(retryDelay(modelResponse, attempt));
+      continue;
+    }
+
+    if (modelResponse.status === 429) {
+      throw new Error("Misu is busy right now. Please wait a moment and try again.");
+    }
+
+    throw new Error("Misu could not answer right now. Please try again shortly.");
+  }
+
+  throw new Error("Misu is busy right now. Please wait a moment and try again.");
+}
+
 const advicePattern = /\b(?:you should|you must|you ought to|you need to|i recommend|my recommendation|i advise|you can afford|you could afford|you cannot afford|you can't afford|a good investment|a bad investment|safe investment|best investment|you (?:should|could|ought to|need to) (?:buy|sell|borrow|invest|take out|apply for))\b/i;
 function insightOnly(reply: string) {
   const plainReply = reply.replace(/\*\*/g, "").replace(/(^|\n)\s*[*-]\s+/g, "$1");
@@ -118,12 +169,20 @@ Deno.serve(async (req) => {
           monthly_amount: Number(item.amount),
           annual_projection: rounded(Number(item.amount) * 12),
         }));
+        const expensePayments = payments.filter((item) => item.type === "expense");
+        const incomePayments = payments.filter((item) => item.type === "income");
+        const monthlyExpenses = rounded(expensePayments.reduce((sum, item) => sum + item.monthly_amount, 0));
+        const monthlyIncome = rounded(incomePayments.reduce((sum, item) => sum + item.monthly_amount, 0));
+
         return {
           basis: "active monthly recurring payments",
           payments,
           count: payments.length,
-          monthly_total: rounded(payments.reduce((sum, item) => sum + item.monthly_amount, 0)),
-          annual_projection: rounded(payments.reduce((sum, item) => sum + item.annual_projection, 0)),
+          monthly_expense_total: monthlyExpenses,
+          monthly_income_total: monthlyIncome,
+          net_monthly_cash_flow: rounded(monthlyIncome - monthlyExpenses),
+          annual_expense_projection: rounded(expensePayments.reduce((sum, item) => sum + item.annual_projection, 0)),
+          annual_income_projection: rounded(incomePayments.reduce((sum, item) => sum + item.annual_projection, 0)),
         };
       }
       if (name === "analyse_savings_goal") {
@@ -207,14 +266,13 @@ Deno.serve(async (req) => {
       };
     };
 
-    const system = `You are Misu, a calm and concise personal-finance insights and maths assistant for the money space “${ledger.name}”. Today's date is ${new Date().toISOString().slice(0, 10)}. Your scope is strictly limited to: factual summaries of tool-returned data, arithmetic, projections, and neutral mathematical scenario comparisons. You must never give financial, investment, tax, credit, pension, debt, insurance, or affordability advice; recommend or endorse an action, product, provider, allocation, or decision; or tell the user what they should, must, need to, can afford, or cannot afford. When asked for advice or a decision, say that you cannot make recommendations and offer to show the relevant figures or compare neutral scenarios. Say that an amount is “within” or “above recorded average monthly headroom”, never that the user can or cannot afford it. You only know information returned by tools; never invent amounts or transactions. Use UK pounds and plain language without Markdown formatting. Use a read tool for every factual money question. Resolve short follow-ups such as “last 12 months” from the preceding conversation rather than asking the user to repeat the merchant or topic. Convert relative periods into exact dates before calling find_transactions. For “last 12 months”, use the inclusive period from one year before tomorrow through today. Distinguish recorded totals from recurring-payment projections explicitly. When asked broadly how much a named merchant, subscription, or repeating payment costs “a year” or “annually”, call both find_transactions for the last 12 months and get_recurring_payments, then report both the recorded total and current annual projection when available. When asked only what was actually spent, call find_transactions. When asked only for a projection, call get_recurring_payments. For a savings goal, never assume the entire target must be saved in one month. Call analyse_savings_goal. Include deadline_months only when the user explicitly supplies a deadline; never choose or infer one. If no deadline is supplied, show concise 3-, 6-, and 12-month options and compare each neutrally with average recorded monthly headroom. If a deadline is supplied, calculate that plan. State how many months of data were used and include the tool’s caveat. Calculations returned by tools are authoritative. If a tool returns an error or no matching data, explain specifically what is unavailable instead of giving a generic failure. When asked to add a transaction, ask only for a missing amount, type, or category, then call draft_transaction. Default to today and a one-off transaction unless the user explicitly requests monthly repetition. When asked to edit an existing transaction, call find_transactions first. If the wording could match more than one transaction, ask a concise question rather than guess. Once the matching records and their IDs are clear, call draft_transaction_updates. Never expose transaction IDs or claim an edit has been saved: say the changes are ready to review and confirm.`;
+    const system = `You are Misu, a calm and concise personal-finance insights and maths assistant for the money space “${ledger.name}”. Today's date is ${new Date().toISOString().slice(0, 10)}. Your scope is strictly limited to: factual summaries of tool-returned data, arithmetic, projections, and neutral mathematical scenario comparisons. You must never give financial, investment, tax, credit, pension, debt, insurance, or affordability advice; recommend or endorse an action, product, provider, allocation, or decision; or tell the user what they should, must, need to, can afford, or cannot afford. When asked for advice or a decision, say that you cannot make recommendations and offer to show the relevant figures or compare neutral scenarios. Say that an amount is “within” or “above recorded average monthly headroom”, never that the user can or cannot afford it. You only know information returned by tools; never invent amounts or transactions. Use UK pounds and plain language without Markdown formatting. Use a read tool for every factual money question. Resolve short follow-ups such as “last 12 months” from the preceding conversation rather than asking the user to repeat the merchant or topic. Convert relative periods into exact dates before calling find_transactions. For “last 12 months”, use the inclusive period from one year before tomorrow through today. Distinguish recorded totals from recurring-payment projections explicitly. For recurring payments, keep income and expenses separate: monthly_expense_total and annual_expense_projection are outgoings, monthly_income_total and annual_income_projection are income, and net_monthly_cash_flow is income minus expenses. Never add recurring income to recurring expenses or describe their combined value as outgoings. When asked broadly how much a named merchant, subscription, or repeating payment costs “a year” or “annually”, call both find_transactions for the last 12 months and get_recurring_payments, then report both the recorded total and current annual projection when available. When asked only what was actually spent, call find_transactions. When asked only for a projection, call get_recurring_payments. For a savings goal, never assume the entire target must be saved in one month. Call analyse_savings_goal. Include deadline_months only when the user explicitly supplies a deadline; never choose or infer one. If no deadline is supplied, show concise 3-, 6-, and 12-month options and compare each neutrally with average recorded monthly headroom. If a deadline is supplied, calculate that plan. State how many months of data were used and include the tool’s caveat. Calculations returned by tools are authoritative. If a tool returns an error or no matching data, explain specifically what is unavailable instead of giving a generic failure. When asked to add a transaction, ask only for a missing amount, type, or category, then call draft_transaction. Default to today and a one-off transaction unless the user explicitly requests monthly repetition. When asked to edit an existing transaction, call find_transactions first. If the wording could match more than one transaction, ask a concise question rather than guess. Once the matching records and their IDs are clear, call draft_transaction_updates. Never expose transaction IDs or claim an edit has been saved: say the changes are ready to review and confirm.`;
     const groqMessages: Array<Record<string, unknown>> = [{ role: "system", content: system }, ...messages];
     const apiKey = Deno.env.get("GROQ_API_KEY");
     if (!apiKey) return response(req, { error: "Misu is not configured yet. Add GROQ_API_KEY to this project’s Edge Function secrets." }, 503);
     let finalReply = "";
     for (let step = 0; step < 4; step++) {
-      const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", { method: "POST", headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: Deno.env.get("MISU_MODEL") || "openai/gpt-oss-20b", temperature: 0.2, messages: groqMessages, tools, tool_choice: "auto" }) });
-      if (!groqResponse.ok) throw new Error(`Misu could not reach its model (${groqResponse.status}).`);
+      const groqResponse = await requestCompletion(apiKey, groqMessages);
       const completion = await groqResponse.json();
       const message = completion.choices?.[0]?.message;
       if (!message) throw new Error("Misu received an incomplete model response.");
