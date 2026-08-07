@@ -106,7 +106,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .theme-toggle { position: fixed; left: 24px; bottom: 24px; z-index: 4; display: flex; align-items: center; gap: 8px; padding: 10px 13px; border-color: var(--line); background: #fff; box-shadow: 0 10px 28px #20212818; }
 #theme-icon { display: grid; place-items: center; width: 18px; height: 18px; color: var(--blue-deep); font-size: 18px; line-height: 1; }
 .theme-toggle:hover { border-color: var(--blue); background: #edf7ff; transform: translateY(-1px); }
-body[data-theme="night"] { --ink: #edf2f7; --muted: #abb5c1; --line: #39424f; --paper: #171b22; --blue: #3f759e; --blue-deep: #a9d8ff; }
+body[data-theme="night"] { --ink: #edf2f7; --muted: #abb5c1; --line: #39424f; --paper: #171b22; --blue: #3f759e; --blue-deep: #a9d8ff; background: var(--paper); color: var(--ink); }
 body[data-theme="night"] button, body[data-theme="night"] .tab, body[data-theme="night"] .period-selector, body[data-theme="night"] .share-space, body[data-theme="night"] #save-another { background: #252c36; color: var(--ink); border-color: var(--line); }
 body[data-theme="night"] .cards article, body[data-theme="night"] .panels article, body[data-theme="night"] .landing-preview, body[data-theme="night"] dialog, body[data-theme="night"] .misu-message.assistant { background: #222933; border-color: var(--line); box-shadow: none; }
 body[data-theme="night"] .cards .left, body[data-theme="night"] .tab[aria-selected="true"], body[data-theme="night"] .misu-message.user { background: #3f759e; border-color: #3f759e; color: #fff; }
