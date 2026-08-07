@@ -8,7 +8,8 @@ const localDate=(date=new Date())=>{const offset=date.getTimezoneOffset()*60000;
 function setTheme(theme){const night=theme==='night';document.body.dataset.theme=night?'night':'day';localStorage.setItem('tiramisu-theme',night?'night':'day');$('theme-toggle').setAttribute('aria-pressed',String(night));$('theme-icon').textContent=night?'☀':'☾';$('theme-label').textContent=night?'Tiramisu in the morning':'Tiramisu at night'}
 function initializeTheme(){setTheme(localStorage.getItem('tiramisu-theme')==='night'?'night':'day')}
 const categoryInfo=(category,type)=>categories[type].find(item=>item[0]===category)||(category==='Rent / mortgage'?['Rent / mortgage','#b9a4f8','rent-mortgage']:categories[type].at(-1));
-const escapeHtml=value=>{const node=document.createElement('div');node.textContent=value;return node.innerHTML};
+const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+const isKnownCategory=(category,type)=>categories[type]?.some(([name])=>name===category)||(type==='expense'&&category==='Rent / mortgage');
 let month=new Date(),transactions=[],recurringRules=[],ledgers=[],activeLedgerId=null,client,user,misuMessages=[],misuDraft=null,misuUpdateDraft=null;month.setDate(1);
 
 function monthKey(){return `${month.getFullYear()}-${String(month.getMonth()+1).padStart(2,'0')}`}
@@ -67,8 +68,8 @@ async function saveMisuDraft() {
   const amount = Number(draft.amount);
 
   // Treat model-generated data as untrusted until it passes the same checks as the form.
-  if (!Number.isFinite(amount) || amount <= 0) {
-    alert('Please enter a valid amount greater than zero.');
+  if (!Number.isFinite(amount) || amount <= 0 || !['income', 'expense'].includes(draft.type) || !isKnownCategory(draft.category, draft.type)) {
+    alert('Misu prepared an invalid transaction. Please try again.');
     return;
   }
 
@@ -171,7 +172,7 @@ function render(){
   const largestAmount=entries[0]?.[1]||0;
   // A square-root scale preserves the ranking while keeping smaller categories legible.
   const breakdownBarWidth=amount=>largestAmount?Math.max(14,Math.sqrt(amount/largestAmount)*100):0;
-  $('breakdown').classList.toggle('is-scrollable',entries.length>10);$('breakdown').innerHTML=entries.length?entries.map(([category,amount])=>{const[,colour,iconId]=categoryInfo(category,'expense'),other=category==='Other'?' title="Includes expenses without a more specific category"':'';return `<div class="row"${other}><span class="breakdown-label"><span class="category-tile" style="background:${tileBackground(colour,iconId)}" aria-hidden="true">${iconSvg(iconId)}</span><span>${category}</span></span><div class="bar"><span style="width:${breakdownBarWidth(amount)}%;background:${colour}"></span></div><span>${money(amount)}</span></div>`}).join(''):'<div class="empty">Your category totals will appear here<br>when you add an expense.</div>';
+  $('breakdown').classList.toggle('is-scrollable',entries.length>10);$('breakdown').innerHTML=entries.length?entries.map(([category,amount])=>{const[,colour,iconId]=categoryInfo(category,'expense'),other=category==='Other'?' title="Includes expenses without a more specific category"':'';return `<div class="row"${other}><span class="breakdown-label"><span class="category-tile" style="background:${tileBackground(colour,iconId)}" aria-hidden="true">${iconSvg(iconId)}</span><span>${escapeHtml(category)}</span></span><div class="bar"><span style="width:${breakdownBarWidth(amount)}%;background:${colour}"></span></div><span>${money(amount)}</span></div>`}).join(''):'<div class="empty">Your category totals will appear here<br>when you add an expense.</div>';
   const recent=[...current].sort((a,b)=>{const byDate=a.date.localeCompare(b.date);if(byDate)return byDate;if(a.recurringTransactionId&&b.recurringTransactionId)return a.category.localeCompare(b.category);return 0});
   const shared = activeLedger()?.memberCount > 0;
 
