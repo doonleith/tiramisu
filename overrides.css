@@ -9,7 +9,7 @@ header > p { position: relative; top: 4px; color: #5d5b64; }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) { .header-misu:hover img { transform: translateY(-3px) rotate(-3deg); } .header-misu:hover::after { opacity: 1; transform: translate(2px,-2px) scale(1.2) rotate(12deg); } }
 button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(--blue-deep); outline-offset: 3px; }
 #app-view { padding-top: 30px; }
-.dashboard-toolbar { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 14px; margin-bottom: 14px; }
+.dashboard-toolbar { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 14px; margin-bottom: 14px; }
 .tabs { display: flex; gap: 7px; overflow-x: auto; padding: 2px; margin: -2px; }
 .tab { flex: 0 0 auto; min-width: 88px; background: #fff; color: var(--muted); text-align: center; }
 .tab[aria-selected="true"] { background: var(--blue); border-color: var(--blue); color: var(--ink); }
@@ -19,6 +19,8 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 #period-label { min-width: 94px; text-align: center; color: var(--ink); font-size: 13px; font-weight: 600; }
 .new-tab { flex: 0 0 auto; color: var(--blue-deep); background: var(--paper); }
 .new-tab:hover { background: var(--blue); border-color: var(--blue); }
+.share-space { color: var(--blue-deep); background: #fff; }
+.share-space:hover { background: var(--blue); border-color: var(--blue); }
 .google-sign-in { display: block; width: 216px; height: 48px; padding: 0; border: 0; border-radius: 24px; background: transparent; line-height: 0; transition: transform .18s ease, filter .18s ease; }
 .google-sign-in img { display: block; width: 216px; height: 48px; }
 .google-sign-in:hover { transform: translateY(-1px); filter: drop-shadow(0 4px 8px #20212818); }
@@ -92,6 +94,8 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-draft { padding: 13px; border: 1px solid var(--blue); border-radius: 13px; background: #edf7ff; }
 .misu-draft b { display: block; margin-bottom: 4px; }
 .misu-draft p { margin: 0 0 11px; color: #315b75; font-size: 13px; line-height: 1.45; }
+.misu-update-list { margin: 0 0 11px; padding-left: 18px; color: #315b75; font-size: 13px; line-height: 1.45; }
+.misu-update-list li + li { margin-top: 7px; }
 .misu-draft-actions { display: flex; gap: 8px; }
 .misu-draft-actions button { padding: 7px 10px; }
 .misu-draft-actions button:first-child { background: var(--ink); color: #fff; }
@@ -99,6 +103,19 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 .misu-form input { flex: 1; min-width: 0; margin: 0; }
 .misu-form button { flex: 0 0 auto; padding: 8px 12px; }
 .misu-note { margin: 0; padding: 0 18px 16px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.share-dialog-content { padding: 24px; }
+.share-explainer { color: var(--muted); font-size: 14px; line-height: 1.5; }
+#create-invite { width: 100%; min-height: 46px; background: var(--ink); color: #fff; }
+.invite-result { margin-top: 18px; }
+.invite-result label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 600; }
+.invite-result > div { display: flex; gap: 8px; }
+.invite-result input { flex: 1; min-width: 0; padding: 11px; border: 1px solid var(--line); border-radius: 9px; font: inherit; }
+#copy-status { min-height: 20px; margin: 7px 0 0; color: var(--blue-deep); font-size: 12px; }
+.share-members { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+.share-member { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.share-member span { min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+.share-member button { flex: 0 0 auto; color: #a54132; background: transparent; }
+.share-empty { margin: 12px 0 0; color: var(--muted); font-size: 13px; }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) { .misu-title:hover img { transform: translateY(-3px) rotate(-3deg); } .misu-title:hover::after { opacity: 1; transform: translate(2px,-2px) scale(1.2) rotate(12deg); } }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) { .misu-home-art:hover img { transform: translateY(-5px) rotate(-2deg); } .misu-home-art:hover::after { opacity: 1; transform: translate(3px,-3px) scale(1.2) rotate(12deg); } }
 @media (max-width: 760px) {
@@ -304,6 +321,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
 
   #close,
   #close-tab,
+  #close-share,
   #misu-close {
     display: grid;
     place-items: center;
@@ -348,7 +366,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
   }
 
   .dashboard-toolbar {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 1fr 1fr;
     align-items: stretch;
     gap: 10px;
     margin-bottom: 10px;
@@ -366,7 +384,7 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
   .period-selector {
     display: grid;
     grid-template-columns: 38px minmax(104px, 1fr) 38px;
-    grid-column: 1;
+    grid-column: 1 / -1;
     gap: 0;
     min-height: 44px;
   }
@@ -403,8 +421,24 @@ button:focus-visible, .transaction-main:focus-visible { outline: 3px solid var(-
   }
 
   .new-tab {
+    grid-column: 1;
+    min-height: 44px;
+  }
+
+  .share-space {
     grid-column: 2;
     min-height: 44px;
+  }
+
+  .share-dialog-content {
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .invite-result input {
+    min-height: 46px;
+    font-size: 16px;
   }
 
   .cards {
