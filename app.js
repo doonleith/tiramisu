@@ -17,6 +17,46 @@ function periodName(){return month.toLocaleDateString('en-GB',{month:'long',year
 function monthTransactions(){return transactions.filter(transaction=>transaction.date.startsWith(monthKey()))}
 function activeLedger(){return ledgers.find(ledger=>ledger.id===activeLedgerId)}
 function userDisplayName(){return user?.user_metadata?.full_name||user?.email||'A member'}
+function showServiceStatus(show){$('service-status').hidden=!show;$('landing-sign-in').disabled=show}
+async function checkService(){
+  if(!window.CLEAR_SUPABASE_URL||!window.CLEAR_SUPABASE_ANON_KEY){showServiceStatus(true);return false}
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),8000);
+  try{
+    const response=await fetch(`${CLEAR_SUPABASE_URL}/auth/v1/health`,{headers:{apikey:CLEAR_SUPABASE_ANON_KEY},signal:controller.signal,cache:'no-store'});
+    showServiceStatus(!response.ok);
+    return response.ok;
+  }catch{showServiceStatus(true);return false}
+  finally{clearTimeout(timeout)}
+}
+async function fetchAllRows(table,sortColumn,ledgerId){
+  const rows=[],pageSize=1000;
+  for(let start=0;;start+=pageSize){
+    const {data,error}=await client.from(table).select('*').eq('ledger_id',ledgerId).order(sortColumn).order('id').range(start,start+pageSize-1);
+    if(error)throw error;
+    rows.push(...data);
+    if(data.length<pageSize)return rows;
+  }
+}
+function csvCell(value){
+  let text=String(value??'');
+  if(/^[\s]*[=+\-@]/.test(text))text=`'${text}`;
+  return `"${text.replaceAll('"','""')}"`;
+}
+async function exportSpace(){
+  const ledger=activeLedger();
+  if(!ledger||!client)return;
+  const button=$('export-space');button.disabled=true;button.textContent='Preparing…';
+  try{
+    const [entries,rules]=await Promise.all([fetchAllRows('transactions','transaction_date',ledger.id),fetchAllRows('recurring_transactions','start_date',ledger.id)]);
+    const ruleById=new Map(rules.map(rule=>[rule.id,rule]));
+    const headers=['Record type','Space','Date','Type','Category','Amount GBP','Note','Repeat','Status','Added by','Record ID','Repeat rule ID'];
+    const rows=[...entries.map(item=>['Transaction',ledger.name,item.transaction_date,item.type,item.category,Number(item.amount).toFixed(2),item.note||'',item.recurring_transaction_id?(ruleById.get(item.recurring_transaction_id)?.frequency||'monthly'):'','Recorded',item.created_by_name||'',item.id,item.recurring_transaction_id||'']),...rules.map(rule=>['Repeat rule',ledger.name,rule.start_date,rule.type,rule.category,Number(rule.amount).toFixed(2),rule.note||'',rule.frequency||'monthly',rule.active?'Active':'Stopped',rule.created_by_name||'',rule.id,''])];
+    const csv='\ufeff'+[headers,...rows].map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n';
+    const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    const link=document.createElement('a');link.href=url;link.download=`tiramisu-${ledger.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'space'}-${localDate()}.csv`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }catch(error){alert(`Could not export this money space: ${error.message}`)}
+  finally{button.disabled=false;button.textContent='Export CSV'}
+}
 function iconSvg(iconId){if(iconId==='disposable-income')return '<img class="category-art" src="assets/disposable-income-coins.svg?v=1" alt="">';if(iconId==='subscriptions')return '<img class="category-art" src="assets/subscriptions-recurring-v2.png?v=1" alt="">';return `<svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/tiramisu-category-icons.svg?v=8#${iconId}"></use></svg>`}
 function tileBackground(colour,iconId){return ['disposable-income','subscriptions'].includes(iconId)?'transparent':`${colour}38`}
 function renderCategoryIcon(category,type){const[,colour,iconId]=categoryInfo(category,type);$('category-icon').style.background=tileBackground(colour,iconId);$('category-icon').innerHTML=iconSvg(iconId)}
@@ -340,7 +380,7 @@ async function materializeRecurring() {
   }
 }
 
-async function load(){if(!user||!activeLedgerId)return;try{await materializeRecurring();const{data,error}=await client.from('transactions').select('*').eq('ledger_id',activeLedgerId).order('transaction_date',{ascending:false});if(error)throw error;transactions=data.map(item=>({id:item.id,userId:item.user_id,type:item.type,amount:Number(item.amount),category:item.category,date:item.transaction_date,note:item.note||'',recurringTransactionId:item.recurring_transaction_id,createdByName:item.created_by_name||''}));render()}catch(error){alert(`Could not load your transactions: ${error.message}`)}}
+async function load(){if(!user||!activeLedgerId)return;try{await materializeRecurring();const{data,error}=await client.from('transactions').select('*').eq('ledger_id',activeLedgerId).order('transaction_date',{ascending:false});if(error)throw error;transactions=data.map(item=>({id:item.id,userId:item.user_id,type:item.type,amount:Number(item.amount),category:item.category,date:item.transaction_date,note:item.note||'',recurringTransactionId:item.recurring_transaction_id,createdByName:item.created_by_name||''}));showServiceStatus(false);render()}catch(error){if(await checkService())alert(`Could not load your transactions: ${error.message}`)}}
 
 function openForm(transaction,selectedType){if(!user)return signIn();const editing=Boolean(transaction),type=transaction?.type||selectedType||'expense',date=transaction?.date||localDate(),rule=recurringRules.find(candidate=>candidate.id===transaction?.recurringTransactionId);$('form').reset();$('id').value=transaction?.id||'';$('type').value=type;$('form-title').textContent=editing?'Edit transaction':`Add ${type}`;$('form-note').textContent=editing?(transaction?.recurringTransactionId?'Changes apply from this date forward':'Update entry'):`New ${type}`;fillCategories(type,transaction?.category);$('amount').value=transaction?.amount||'';$('date').value=date;$('recurring-start-date').value=date;$('note').value=transaction?.note||'';$('repeat-transaction').checked=editing?Boolean(transaction?.recurringTransactionId):true;$('recurrence-frequency').value=rule?.frequency||'monthly';syncDateFields();$('delete').style.visibility=editing?'visible':'hidden';if(!$('dialog').open)$('dialog').showModal();$('amount').focus()}
 
@@ -463,12 +503,14 @@ async function acceptInvite(inviteId) {
   localStorage.setItem('tiramisu-active-ledger', data);
 }
 
-async function setUser(nextUser){user=nextUser;$('user').hidden=!user;$('header-misu').hidden=Boolean(user);$('landing').hidden=Boolean(user);$('misu-home').hidden=Boolean(user);$('app-view').hidden=!user;if(user){$('name').textContent=user.user_metadata.full_name||user.email;try{await loadLedgers();await load()}catch(error){alert(`Could not open your money spaces: ${error.message}`)}}else{transactions=[];ledgers=[];activeLedgerId=null;misuMessages=[];misuDraft=null;misuUpdateDraft=null;$('tabs').innerHTML='';render()}}
+async function setUser(nextUser){user=nextUser;$('user').hidden=!user;$('header-misu').hidden=Boolean(user);$('landing').hidden=Boolean(user);$('misu-home').hidden=Boolean(user);$('app-view').hidden=!user;if(user){$('name').textContent=user.user_metadata.full_name||user.email;try{await loadLedgers();await load()}catch(error){if(await checkService())alert(`Could not open your money spaces: ${error.message}`)}}else{transactions=[];ledgers=[];activeLedgerId=null;misuMessages=[];misuDraft=null;misuUpdateDraft=null;$('tabs').innerHTML='';render()}}
 async function signIn() {
   if (!client) {
     alert('The app is still loading. Please try again.');
     return;
   }
+
+  if (!await checkService()) return;
 
   const { error } = await client.auth.signInWithOAuth({
     provider: 'google',
@@ -489,9 +531,7 @@ async function initialize() {
     });
   }
 
-  if (!window.CLEAR_SUPABASE_URL) {
-    return render();
-  }
+  if (!await checkService()) return render();
 
   client = supabase.createClient(
     CLEAR_SUPABASE_URL,
@@ -547,6 +587,8 @@ async function initialize() {
 
 document.querySelectorAll('.add').forEach(button=>button.onclick=()=>openForm(null,button.dataset.type));$('close').onclick=()=>$('dialog').close();$('close-tab').onclick=()=>$('tab-dialog').close();$('misu-close').onclick=()=>$('misu-dialog').close();$('misu-open').onclick=openMisu;$('theme-toggle').onclick=()=>setTheme(document.body.dataset.theme==='night'?'day':'night');initializeTheme();$('misu-form').onsubmit=askMisu;$('misu-draft').onclick=event=>{if(event.target.closest('[data-misu-confirm]'))saveMisuDraft();if(event.target.closest('[data-misu-confirm-update]'))saveMisuUpdateDraft();if(event.target.closest('[data-misu-discard]')){misuDraft=null;misuUpdateDraft=null;renderMisu()}};$('new-tab').onclick=()=>{$('tab-form').reset();$('tab-dialog').showModal();$('tab-name').focus()};$('tabs').onclick=event=>{const id=event.target.closest('[data-ledger]')?.dataset.ledger;if(id)switchLedger(id)};$('tabs').onkeydown=event=>{const buttons=[...$('tabs').querySelectorAll('[data-ledger]')],index=buttons.indexOf(document.activeElement);if(index<0)return;let next;if(event.key==='ArrowRight')next=(index+1)%buttons.length;else if(event.key==='ArrowLeft')next=(index-1+buttons.length)%buttons.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=buttons.length-1;else return;event.preventDefault();switchLedger(buttons[next].dataset.ledger,true)};$('previous-period').onclick=()=>changePeriod(-1);$('next-period').onclick=()=>changePeriod(1);$('transactions').onclick=event=>{const id=event.target.closest('[data-edit]')?.dataset.edit;if(id)openForm(transactions.find(item=>item.id===id))};$('category').onchange=()=>renderCategoryIcon($('category').value,$('type').value);$('repeat-monthly').onchange=syncDateFields;$('landing-sign-in').onclick=signIn;$('sign-out').onclick=()=>client?.auth.signOut();
 $('share-space').onclick = openShareDialog;
+$('export-space').onclick = exportSpace;
+$('service-retry').onclick = async () => {if(await checkService())location.reload()};
 $('close-share').onclick = () => $('share-dialog').close();
 $('create-invite').onclick = createInvite;
 $('copy-invite').onclick = copyInvite;
