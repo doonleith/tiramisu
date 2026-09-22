@@ -11,8 +11,8 @@
   <link rel="apple-touch-icon" href="assets/misu-apple-touch-icon.png?v=1">
   <title>tiramisu - personal finance</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="info.css?v=2">
-  <link rel="stylesheet" href="overrides.css?v=49">
+  <link rel="stylesheet" href="overrides.css?v=48">
+  <link rel="stylesheet" href="info.css?v=1">
 </head>
 <body>
   <main>
@@ -22,6 +22,10 @@
       <span id="header-misu" class="header-misu" aria-hidden="true"><img src="assets/misu-chat.png?v=3" alt=""></span>
       <div id="user" hidden><span id="name"></span><button id="sign-out">Sign out</button></div>
     </header>
+    <div id="service-status" class="service-status" role="status" hidden>
+      <span>Tiramisu cannot reach your data right now. Please try again shortly.</span>
+      <button id="service-retry" type="button">Try again</button>
+    </div>
 
     <section id="landing" class="landing">
       <div class="landing-copy">
@@ -67,6 +71,7 @@
         <div class="period-selector" aria-label="Selected period"><button id="previous-period" type="button" aria-label="Previous month">←</button><span id="period-label" aria-live="polite"></span><button id="next-period" type="button" aria-label="Next month">→</button></div>
         <button id="new-tab" class="new-tab" type="button">+ Add space</button>
         <button id="share-space" class="share-space" type="button">Share</button>
+        <button id="export-space" class="export-space" type="button" aria-label="Export this money space as CSV">Export CSV</button>
       </div>
       <div id="ledger-panel" role="tabpanel">
       <section class="cards" aria-live="polite">
@@ -114,6 +119,6 @@
   <script src="supabase/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>document.getElementById('form').insertAdjacentHTML('afterbegin','<input id="repeat-monthly" type="hidden">');</script>
-  <script src="app.js?v=63"></script>
+  <script src="app.js?v=64"></script>
   <script>document.getElementById('repeat-transaction').onchange=syncDateFields;</script>
 </body></html>
