@@ -9,6 +9,7 @@ Tiramisu is a lightweight, manual personal-finance tracker. It is a static web a
 - Record income and expenses manually.
 - Keep money in separate named spaces, such as Personal, Household, or Holiday.
 - View income, spending, remaining money, category totals, and activity for a selected month.
+- Export all recorded transactions and repeat rules from the selected money space as a CSV file.
 - Create monthly recurring entries by selecting a payment day, such as the 1st of the month.
 - Keep recurring entries private to the selected money space.
 - Share a money space through a one-time invite link.
